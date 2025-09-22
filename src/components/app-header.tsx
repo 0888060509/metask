@@ -1,3 +1,4 @@
+
 import {
   Avatar,
   AvatarFallback,
@@ -17,6 +18,7 @@ import {
   Settings,
   User,
 } from "lucide-react";
+import Link from "next/link";
 import { SidebarTrigger } from "./ui/sidebar";
 
 type AppHeaderProps = {
@@ -47,13 +49,11 @@ export function AppHeader({
                 <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                    <User className="mr-2" />
-                    <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                    <Settings className="mr-2" />
-                    <span>Settings</span>
+                <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings">
+                        <Settings className="mr-2" />
+                        <span>Settings</span>
+                    </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
