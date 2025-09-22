@@ -28,6 +28,12 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiSelectCombobox } from "@/components/ui/multi-select-combobox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
@@ -45,6 +51,7 @@ import {
   Send,
   Save,
   X,
+  MoreHorizontal,
 } from "lucide-react";
 import { iconMap } from "../project/icon-picker";
 
@@ -200,7 +207,7 @@ export function TaskDetailDialog({
                                 className="font-headline text-2xl h-auto p-0 border-0 shadow-none focus-visible:ring-0"
                             />
                         ) : (
-                            <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
+                            <SheetTitle className="font-headline text-2xl flex-1 break-words">{task.title}</SheetTitle>
                         )}
                         {isEditing ? (
                            <Textarea
@@ -211,7 +218,7 @@ export function TaskDetailDialog({
                              className="text-sm text-muted-foreground p-0 border-0 shadow-none focus-visible:ring-0"
                            />
                         ) : (
-                           task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>
+                           task.description && <SheetDescription className="pt-1 break-words">{task.description}</SheetDescription>
                         )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -227,14 +234,26 @@ export function TaskDetailDialog({
                             </Button>
                           </>
                         ) : (
-                          <Button variant="outline" onClick={handleEditToggle}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </Button>
+                          <>
+                            <Button variant="outline" onClick={handleEditToggle}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        <span>Delete Task</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                          </>
                         )}
-                        <Button variant="destructive" size="icon" onClick={handleDelete} aria-label="Delete task">
-                           <Trash2 className="h-4 w-4" />
-                        </Button>
                         <SheetClose />
                     </div>
                 </div>
