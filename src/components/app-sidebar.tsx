@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -117,8 +118,8 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
                   return (
                   <SidebarMenuItem key={project.id}>
                     <div className="flex items-center w-full">
-                        <SidebarMenuButton asChild className="flex-1">
-                            <Link href="#">
+                        <SidebarMenuButton asChild isActive={pathname === `/dashboard/projects/${project.id}`} className="flex-1">
+                            <Link href={`/dashboard/projects/${project.id}`}>
                                 <Icon />
                                 {project.name}
                             </Link>
