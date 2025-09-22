@@ -118,8 +118,7 @@ export default function SettingsPage() {
                     </div>
                     {emailNotifications && (
                         <div className="space-y-2 pt-4">
-                            <Label htmlFor="notification-email">Email for updates</Label>
-                            <Input id="notification-email" type="email" defaultValue={currentUser?.email} placeholder="Enter email for notifications"/>
+                            <p className="text-sm text-muted-foreground">Email for updates will use the same users' mail</p>
                         </div>
                     )}
                 </div>
