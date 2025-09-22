@@ -17,6 +17,7 @@ export type Filters = {
 export default function Home() {
   const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [filters, setFilters] = React.useState<Filters>({
     projects: [],
     assignees: [],
@@ -34,6 +35,10 @@ export default function Home() {
 
   const filteredTasks = React.useMemo(() => {
     return tasks.filter((task) => {
+      const searchMatch =
+        searchQuery.trim() === "" ||
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const projectMatch =
         filters.projects.length === 0 ||
         filters.projects.includes(task.projectId);
@@ -43,13 +48,17 @@ export default function Home() {
       const priorityMatch =
         filters.priorities.length === 0 ||
         filters.priorities.includes(task.priority);
-      return projectMatch && assigneeMatch && priorityMatch;
+      return searchMatch && projectMatch && assigneeMatch && priorityMatch;
     });
-  }, [tasks, filters]);
+  }, [tasks, filters, searchQuery]);
 
   return (
     <div className="flex h-full flex-col">
-      <AppHeader onNewTaskClick={() => setIsDialogOpen(true)} />
+      <AppHeader 
+        onNewTaskClick={() => setIsDialogOpen(true)}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
       <TaskFilters filters={filters} setFilters={setFilters} />
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <KanbanBoard tasks={filteredTasks} setTasks={setTasks} />

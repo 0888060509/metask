@@ -32,9 +32,11 @@ import { SidebarTrigger } from "./ui/sidebar";
 
 type AppHeaderProps = {
   onNewTaskClick: () => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 };
 
-export function AppHeader({ onNewTaskClick }: AppHeaderProps) {
+export function AppHeader({ onNewTaskClick, searchQuery, setSearchQuery }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <SidebarTrigger className="md:hidden" />
@@ -44,7 +46,12 @@ export function AppHeader({ onNewTaskClick }: AppHeaderProps) {
         </div>
         <div className="relative flex-1 md:max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search tasks..." className="pl-8" />
+          <Input 
+            placeholder="Search tasks..." 
+            className="pl-8" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <div className="flex items-center gap-2">
             <Button onClick={onNewTaskClick}>
