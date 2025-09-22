@@ -34,7 +34,6 @@ export default function Home() {
   const [projects, setProjects] = React.useState<Project[]>(initialProjects);
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
-  const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = React.useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
@@ -81,12 +80,6 @@ export default function Home() {
     setSelectedTask(null);
   };
   
-  const handleOpenEditDialog = () => {
-    if (selectedTask) {
-        setIsEditTaskDialogOpen(true);
-    }
-  }
-
   // Project handlers
   const handleCreateProject = () => {
     setSelectedProject(null);
@@ -207,20 +200,6 @@ export default function Home() {
             onSave={handleCreateTask}
             projects={projects}
           />
-          {selectedTask && (
-            <TaskDialog
-                open={isEditTaskDialogOpen}
-                onOpenChange={setIsEditTaskDialogOpen}
-                onSave={(updatedTaskData) => {
-                if (selectedTask) {
-                    const updatedTask = {...selectedTask, ...updatedTaskData};
-                    handleUpdateTask(updatedTask);
-                }
-                }}
-                task={selectedTask}
-                projects={projects}
-            />
-          )}
          <TaskDetailDialog 
             task={selectedTask}
             projects={projects}
@@ -229,7 +208,7 @@ export default function Home() {
                     handleCloseDetailDialog();
                 }
             }}
-            onEdit={handleOpenEditDialog}
+            onUpdate={handleUpdateTask}
             onDelete={handleDeleteTask}
             onComment={handleAddComment}
           />

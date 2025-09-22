@@ -15,13 +15,18 @@ import {
   SheetDescription,
   SheetClose,
 } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Combobox } from "@/components/ui/combobox";
+import { MultiSelectCombobox } from "@/components/ui/multi-select-combobox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { cn } from "@/lib/utils";
@@ -34,14 +39,12 @@ import {
   Tag as TagIcon,
   CheckCircle,
   Edit,
-  MoreVertical,
   Trash2,
   MessageSquare,
   Clock,
   Send,
-  PlusCircle,
-  ArrowRight,
-  MessageCircle,
+  Save,
+  X,
 } from "lucide-react";
 import { iconMap } from "../project/icon-picker";
 
@@ -50,7 +53,7 @@ type TaskDetailSheetProps = {
   task: Task | null;
   projects: Project[];
   onOpenChange: (open: boolean) => void;
-  onEdit: () => void;
+  onUpdate: (task: Task) => void;
   onDelete: (taskId: string) => void;
   onComment: (taskId: string, commentText: string) => void;
 };
@@ -71,18 +74,22 @@ function DetailRow({
   icon: Icon,
   label,
   children,
+  isEditing,
+  className,
 }: {
   icon: React.ElementType;
   label: string;
   children: React.ReactNode;
+  isEditing?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="grid grid-cols-3 items-start gap-4">
-      <div className="flex col-span-1 items-center gap-2 text-sm font-medium text-muted-foreground">
+    <div className={cn("grid grid-cols-3 items-start gap-4", className)}>
+      <div className="flex col-span-1 items-center gap-2 text-sm font-medium text-muted-foreground pt-2">
         <Icon className="h-4 w-4" />
         <span>{label}</span>
       </div>
-      <div className="col-span-2 text-sm">{children}</div>
+      <div className={cn("col-span-2 text-sm", isEditing ? "px-0" : "pt-2")}>{children}</div>
     </div>
   );
 }
@@ -91,15 +98,37 @@ export function TaskDetailDialog({
   task,
   projects,
   onOpenChange,
-  onEdit,
+  onUpdate,
   onDelete,
   onComment,
 }: TaskDetailSheetProps) {
   const [commentText, setCommentText] = React.useState("");
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editedTask, setEditedTask] = React.useState<Partial<Task>>({});
 
-  const handleEdit = () => {
-    // onOpenChange(false);
-    onEdit();
+  // Memoized options for performance
+  const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
+  const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
+  const tagOptions = React.useMemo(() => tags.map(tag => ({ value: tag.id, label: tag.name })), []);
+  
+  React.useEffect(() => {
+    if (task) {
+        setEditedTask({
+            ...task,
+            deadline: task.deadline ? new Date(task.deadline) : undefined,
+        });
+    } else {
+        setIsEditing(false);
+    }
+  }, [task]);
+
+  
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Cancel edit
+      if(task) setEditedTask(task);
+    }
+    setIsEditing(!isEditing);
   };
   
   const handleDelete = () => {
@@ -116,20 +145,33 @@ export function TaskDetailDialog({
     }
   };
   
+  const handleSave = () => {
+    if (task) {
+      onUpdate({ ...task, ...editedTask } as Task);
+      setIsEditing(false);
+    }
+  };
+
+  const handleFieldChange = (field: keyof Task, value: any) => {
+    setEditedTask(prev => ({ ...prev, [field]: value }));
+  };
+
+  const currentTask = isEditing ? editedTask : task;
+  
   const assignees = React.useMemo(() => {
-    if (!task?.assigneeIds) return [];
-    return task.assigneeIds.map(id => users.find(user => user.id === id)).filter(Boolean) as User[];
-  }, [task?.assigneeIds]);
+    if (!currentTask?.assigneeIds) return [];
+    return currentTask.assigneeIds.map(id => users.find(user => user.id === id)).filter(Boolean) as User[];
+  }, [currentTask?.assigneeIds]);
   
   const project = React.useMemo(() => {
-    if (!task) return null;
-    return projects.find((p) => p.id === task.projectId);
-  }, [task, projects]);
+    if (!currentTask) return null;
+    return projects.find((p) => p.id === currentTask.projectId);
+  }, [currentTask, projects]);
 
   const taskTags = React.useMemo(() => {
-    if (!task?.tagIds) return [];
-    return task.tagIds.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as Tag[];
-  }, [task?.tagIds]);
+    if (!currentTask?.tagIds) return [];
+    return currentTask.tagIds.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as Tag[];
+  }, [currentTask?.tagIds]);
 
   const sortedActivity = React.useMemo(() => {
     if (!task?.activity) return [];
@@ -141,7 +183,7 @@ export function TaskDetailDialog({
   return (
     <Sheet open={!!task} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right">
-        {!task ? (
+        {!task || !currentTask ? (
           <div className="flex items-center justify-center h-full">
             <p>Loading task...</p>
           </div>
@@ -149,29 +191,50 @@ export function TaskDetailDialog({
           <>
             <SheetHeader className="p-6">
                 <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-1">
-                        <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
-                        {task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>}
+                    <div className="flex-1 space-y-2">
+                        {isEditing ? (
+                             <Input 
+                                id="title" 
+                                value={currentTask.title || ''} 
+                                onChange={(e) => handleFieldChange('title', e.target.value)}
+                                className="font-headline text-2xl h-auto p-0 border-0 shadow-none focus-visible:ring-0"
+                            />
+                        ) : (
+                            <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
+                        )}
+                        {isEditing ? (
+                           <Textarea
+                             id="description"
+                             value={currentTask.description || ''}
+                             onChange={(e) => handleFieldChange('description', e.target.value)}
+                             placeholder="Add a description..."
+                             className="text-sm text-muted-foreground p-0 border-0 shadow-none focus-visible:ring-0"
+                           />
+                        ) : (
+                           task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                                <MoreVertical className="h-5 w-5" />
-                                <span className="sr-only">More actions</span>
+                        {isEditing ? (
+                          <>
+                            <Button variant="outline" onClick={handleEditToggle}>
+                                <X className="mr-2 h-4 w-4"/>
+                                Cancel
                             </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={handleEdit}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                <span>Edit</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                <span>Delete</span>
-                            </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                            <Button onClick={handleSave}>
+                                <Save className="mr-2 h-4 w-4"/>
+                                Save
+                            </Button>
+                          </>
+                        ) : (
+                          <Button variant="outline" onClick={handleEditToggle}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </Button>
+                        )}
+                        <Button variant="destructive" size="icon" onClick={handleDelete} aria-label="Delete task">
+                           <Trash2 className="h-4 w-4" />
+                        </Button>
                         <SheetClose />
                     </div>
                 </div>
@@ -187,37 +250,84 @@ export function TaskDetailDialog({
                     </TabsList>
                     <TabsContent value="details">
                       <div className="space-y-4 rounded-lg border p-4 mt-4">
-                          <DetailRow icon={CheckCircle} label="Status">
-                              <Badge className={cn("text-white", statusClasses[task.status])}>
-                              {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-                              </Badge>
+                          <DetailRow icon={CheckCircle} label="Status" isEditing={isEditing}>
+                              {isEditing ? (
+                                <Select value={currentTask.status} onValueChange={(v) => handleFieldChange('status', v as Task['status'])}>
+                                  <SelectTrigger className="h-8">
+                                    <SelectValue/>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="todo">To Do</SelectItem>
+                                    <SelectItem value="inprogress">In Progress</SelectItem>
+                                    <SelectItem value="done">Done</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Badge className={cn("text-white", statusClasses[task.status])}>
+                                {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                                </Badge>
+                              )}
                           </DetailRow>
 
-                          <DetailRow icon={Flag} label="Priority">
-                              <span
-                              className={cn("font-medium", priorityClasses[task.priority])}
-                              >
-                              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                              </span>
+                          <DetailRow icon={Flag} label="Priority" isEditing={isEditing}>
+                             {isEditing ? (
+                                <Select value={currentTask.priority} onValueChange={(v) => handleFieldChange('priority', v as TaskPriority)}>
+                                    <SelectTrigger className="h-8">
+                                        <SelectValue/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="low">Low</SelectItem>
+                                        <SelectItem value="medium">Medium</SelectItem>
+                                        <SelectItem value="high">High</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                              ) : (
+                                <span className={cn("font-medium", priorityClasses[task.priority])}>
+                                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                                </span>
+                              )}
                           </DetailRow>
 
-                          {project && (
-                              <DetailRow icon={Folder} label="Project">
-                              <div className="flex items-center gap-2">
-                                  <ProjectIcon className="h-4 w-4 text-muted-foreground" />
-                                  <span>{project.name}</span>
-                              </div>
-                              </DetailRow>
-                          )}
+                           <DetailRow icon={Folder} label="Project" isEditing={isEditing}>
+                              {isEditing ? (
+                                <Combobox
+                                    options={projectOptions}
+                                    value={currentTask.projectId || ''}
+                                    onValueChange={(v) => handleFieldChange('projectId', v)}
+                                    placeholder="Select a project"
+                                    searchPlaceholder="Search projects..."
+                                    emptyResult="No projects found."
+                                />
+                              ) : project ? (
+                                <div className="flex items-center gap-2">
+                                    <ProjectIcon className="h-4 w-4 text-muted-foreground" />
+                                    <span>{project.name}</span>
+                                </div>
+                              ) : ( <span>No Project</span>)}
+                          </DetailRow>
 
-                          {task.deadline && (
-                              <DetailRow icon={Calendar} label="Deadline">
-                              {format(task.deadline, "PPP")}
-                              </DetailRow>
-                          )}
+                          <DetailRow icon={Calendar} label="Deadline" isEditing={isEditing}>
+                             {isEditing ? (
+                                 <DatePicker
+                                    date={currentTask.deadline}
+                                    setDate={(d) => handleFieldChange('deadline', d)}
+                                 />
+                             ) : (
+                                currentTask.deadline ? format(currentTask.deadline, "PPP") : 'No deadline'
+                             )}
+                          </DetailRow>
 
-                          {assignees && assignees.length > 0 && (
-                              <DetailRow icon={UserIcon} label="Assignees">
+                          <DetailRow icon={UserIcon} label="Assignees" isEditing={isEditing}>
+                              {isEditing ? (
+                                <MultiSelectCombobox
+                                    options={userOptions}
+                                    selected={currentTask.assigneeIds || []}
+                                    onSelectedChange={(v) => handleFieldChange('assigneeIds', v)}
+                                    placeholder="Select assignees"
+                                    searchPlaceholder="Search assignees..."
+                                    emptyResult="No assignees found."
+                                />
+                              ) : assignees.length > 0 ? (
                                 <div className="flex flex-col gap-2">
                                   {assignees.map(assignee => (
                                     <div key={assignee.id} className="flex items-center gap-2">
@@ -231,20 +341,29 @@ export function TaskDetailDialog({
                                     </div>
                                   ))}
                                 </div>
-                              </DetailRow>
-                          )}
+                              ): (<span>Not assigned</span>)}
+                          </DetailRow>
 
-                          {taskTags && taskTags.length > 0 && (
-                              <DetailRow icon={TagIcon} label="Tags">
-                              <div className="flex flex-wrap gap-2">
+                           <DetailRow icon={TagIcon} label="Tags" isEditing={isEditing}>
+                              {isEditing ? (
+                                 <MultiSelectCombobox
+                                    options={tagOptions}
+                                    selected={currentTask.tagIds || []}
+                                    onSelectedChange={(v) => handleFieldChange('tagIds', v)}
+                                    placeholder="Select tags"
+                                    searchPlaceholder="Search tags..."
+                                    emptyResult="No tags found."
+                                />
+                              ) : taskTags.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
                                   {taskTags.map((tag) => (
                                   <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.color)}>
                                       {tag.name}
                                   </Badge>
                                   ))}
-                              </div>
-                              </DetailRow>
-                          )}
+                               </div>
+                              ) : (<span>No tags</span>) }
+                          </DetailRow>
                       </div>
                     </TabsContent>
                     <TabsContent value="activity">
