@@ -23,18 +23,21 @@ import { SidebarTrigger } from "./ui/sidebar";
 
 type AppHeaderProps = {
   title: string;
+  children?: React.ReactNode;
 };
 
 export function AppHeader({ 
   title,
+  children,
 }: AppHeaderProps) {
   return (
     <>
       <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
         <SidebarTrigger className="md:hidden" />
         <div className="flex w-full items-center justify-between gap-4">
-          <div className="hidden md:block">
-              <h1 className="font-headline text-2xl font-bold">{title}</h1>
+          <div className="flex items-center gap-4">
+              <h1 className="font-headline text-2xl font-bold hidden md:block">{title}</h1>
+              {children}
           </div>
           <div className="flex flex-1 items-center justify-end gap-2">
             <DropdownMenu>

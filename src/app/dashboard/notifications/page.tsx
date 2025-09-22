@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from "react";
@@ -9,12 +10,15 @@ import { tasks, users } from "@/lib/data";
 import { Notification, Task, User, Comment } from "@/lib/types";
 import { format, formatDistanceToNowStrict, isToday, isYesterday } from "date-fns";
 import { cn } from "@/lib/utils";
-import { MessageSquare, UserPlus, CheckCircle, AtSign, FileClock } from "lucide-react";
+import { MessageSquare, UserPlus, CheckCircle, AtSign, FileClock, Check } from "lucide-react";
 import { DashboardContext } from "../layout";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type NotificationItemProps = {
   notification: Notification;
   onNotificationClick: (taskId: string) => void;
+  onMarkAsRead: (notificationId: string) => void;
 };
 
 const notificationIcons = {
@@ -66,20 +70,48 @@ const getNotificationContext = (notification: Notification, task?: Task) => {
     return null;
 }
 
-function NotificationItem({ notification, onNotificationClick }: NotificationItemProps) {
+function NotificationItem({ notification, onNotificationClick, onMarkAsRead }: NotificationItemProps) {
   const actor = users.find((u) => u.id === notification.actorId);
   const task = tasks.find((t) => t.id === notification.taskId);
   const Icon = notificationIcons[notification.type];
 
   return (
-    <div
+     <div
       className={cn(
-        "flex items-start gap-4 p-4 cursor-pointer transition-colors hover:bg-muted",
-        !notification.isRead && "bg-primary/5"
+        "group relative flex items-start gap-4 p-4 border-l-4",
+        notification.isRead ? "border-transparent" : "border-primary"
       )}
-      onClick={() => notification.taskId && onNotificationClick(notification.taskId)}
     >
-        <div className="relative h-10 w-10">
+      <div className="absolute -left-px top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+        {!notification.isRead && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 rounded-full bg-background hover:bg-muted"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onMarkAsRead(notification.id)
+                    }}
+                >
+                    <Check className="h-4 w-4 text-primary" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Mark as read</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+
+      <div
+        className={cn("flex-1 flex items-start gap-4 pl-4 cursor-pointer", notification.isRead && "opacity-60 hover:opacity-100 transition-opacity")}
+        onClick={() => notification.taskId && onNotificationClick(notification.taskId)}
+      >
+        <div className="relative h-10 w-10 shrink-0">
              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-muted">
                 <Icon className="h-5 w-5 text-muted-foreground" />
             </div>
@@ -89,17 +121,15 @@ function NotificationItem({ notification, onNotificationClick }: NotificationIte
                     <AvatarFallback className="text-[10px]">{actor?.name.charAt(0)}</AvatarFallback>
                 </Avatar>
             )}
+        </div>
+        <div className="flex-1">
+            <p className="text-sm text-foreground">{getNotificationText(notification, actor, task)}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+                {formatDistanceToNowStrict(notification.timestamp, { addSuffix: true })}
+            </p>
+            {getNotificationContext(notification, task)}
+        </div>
       </div>
-      <div className="flex-1">
-        <p className="text-sm text-foreground">{getNotificationText(notification, actor, task)}</p>
-        <p className="text-xs text-muted-foreground mt-1">
-            {formatDistanceToNowStrict(notification.timestamp, { addSuffix: true })}
-        </p>
-        {getNotificationContext(notification, task)}
-      </div>
-      {!notification.isRead && (
-        <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1 shrink-0"></div>
-      )}
     </div>
   );
 }
@@ -137,19 +167,28 @@ export default function NotificationsPage() {
     }, {});
     
     const orderedGroups = ['Today', 'Yesterday', 'Older'].filter(group => groupedNotifications[group]);
+    
+    const unreadCount = userNotifications.filter(n => !n.isRead).length;
 
     const handleMarkAllAsRead = () => {
         setNotifications((prev: Notification[]) => prev.map(n => n.userId === currentUserId ? { ...n, isRead: true } : n));
     };
 
+    const handleMarkAsRead = (notificationId: string) => {
+        setNotifications((prev: Notification[]) => prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n));
+    };
+
     return (
         <div className="flex h-full flex-col">
-            <AppHeader title="Notifications" />
-            <div className="flex-1 overflow-y-auto p-4 md:p-6">
-                <Card className="max-w-3xl mx-auto">
-                    <CardHeader className="flex flex-row items-center justify-between">
+            <AppHeader title="Notifications">
+              {unreadCount > 0 && (
+                <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">Mark all as read</Button>
+              )}
+            </AppHeader>
+            <div className="flex-1 overflow-y-auto">
+                <Card className="max-w-3xl mx-auto my-4 md:my-6">
+                    <CardHeader>
                         <CardTitle className="font-headline">Your Updates</CardTitle>
-                        <button onClick={handleMarkAllAsRead} className="text-sm font-medium text-primary hover:underline">Mark all as read</button>
                     </CardHeader>
                     <CardContent className="p-0">
                         {userNotifications.length === 0 ? (
@@ -165,7 +204,11 @@ export default function NotificationsPage() {
                                         <NotificationItem
                                             key={notification.id}
                                             notification={notification}
-                                            onNotificationClick={handleOpenTaskFromNotification}
+                                            onNotificationClick={(taskId) => {
+                                                handleMarkAsRead(notification.id);
+                                                handleOpenTaskFromNotification(taskId);
+                                            }}
+                                            onMarkAsRead={handleMarkAsRead}
                                         />
                                     ))}
                                    </div>
