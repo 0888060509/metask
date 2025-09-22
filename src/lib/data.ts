@@ -168,6 +168,7 @@ export const notifications: Notification[] = [
       actorId: "user-2",
       type: "mention",
       taskId: "task-1",
+      details: { commentId: 'comment-1' },
       isRead: false,
       timestamp: new Date(new Date().setHours(new Date().getHours() - 8)),
     },
@@ -187,13 +188,14 @@ export const notifications: Notification[] = [
       actorId: "user-2",
       type: "new_comment",
       taskId: "task-1",
+      details: { commentId: 'comment-4' },
       isRead: true,
       timestamp: new Date(new Date().setDate(new Date().getDate() - 2)),
     },
      {
       id: "notif-5",
       userId: "user-4",
-      actorId: "user-1",
+      actorId: "user-1", // System notifications might not have an actor, but we'll use one for now
       type: "due_reminder",
       taskId: "task-8",
       isRead: false,

@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tasks, users } from "@/lib/data";
-import { Notification, Task, User } from "@/lib/types";
+import { Notification, Task, User, Comment } from "@/lib/types";
 import { format, formatDistanceToNowStrict, isToday, isYesterday } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MessageSquare, UserPlus, CheckCircle, AtSign, FileClock } from "lucide-react";
@@ -49,6 +49,22 @@ const getNotificationText = (notification: Notification, actor?: User, task?: Ta
     }
 }
 
+const getNotificationContext = (notification: Notification, task?: Task) => {
+    if (notification.type === 'mention' || notification.type === 'new_comment' || notification.type === 'comment') {
+        const commentId = notification.details?.commentId;
+        if (!commentId || !task?.comments) return null;
+
+        const comment = task.comments.find(c => c.id === commentId);
+        if (!comment) return null;
+
+        return (
+            <div className="mt-2 text-sm p-3 bg-muted/70 rounded-md border text-muted-foreground break-words whitespace-pre-wrap">
+                "{comment.text}"
+            </div>
+        )
+    }
+    return null;
+}
 
 function NotificationItem({ notification, onNotificationClick }: NotificationItemProps) {
   const actor = users.find((u) => u.id === notification.actorId);
@@ -58,28 +74,31 @@ function NotificationItem({ notification, onNotificationClick }: NotificationIte
   return (
     <div
       className={cn(
-        "flex items-start gap-4 p-4 rounded-lg cursor-pointer transition-colors hover:bg-muted",
+        "flex items-start gap-4 p-4 cursor-pointer transition-colors hover:bg-muted",
         !notification.isRead && "bg-primary/5"
       )}
-      onClick={() => onNotificationClick(notification.taskId)}
+      onClick={() => notification.taskId && onNotificationClick(notification.taskId)}
     >
-      <div className="relative">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={actor?.avatarUrl} alt={actor?.name} data-ai-hint="person portrait"/>
-          <AvatarFallback>{actor?.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="absolute -bottom-1 -right-1 bg-background p-0.5 rounded-full">
-            <Icon className="h-4 w-4 text-muted-foreground" />
-        </div>
+        <div className="relative h-10 w-10">
+             <div className="h-10 w-10 flex items-center justify-center rounded-full bg-muted">
+                <Icon className="h-5 w-5 text-muted-foreground" />
+            </div>
+            {actor && (
+                <Avatar className="absolute -bottom-1 -right-1 h-5 w-5 border-2 border-background">
+                    <AvatarImage src={actor?.avatarUrl} alt={actor?.name} data-ai-hint="person portrait"/>
+                    <AvatarFallback className="text-[10px]">{actor?.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+            )}
       </div>
       <div className="flex-1">
         <p className="text-sm text-foreground">{getNotificationText(notification, actor, task)}</p>
         <p className="text-xs text-muted-foreground mt-1">
             {formatDistanceToNowStrict(notification.timestamp, { addSuffix: true })}
         </p>
+        {getNotificationContext(notification, task)}
       </div>
       {!notification.isRead && (
-        <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1"></div>
+        <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1 shrink-0"></div>
       )}
     </div>
   );
@@ -109,8 +128,6 @@ export default function NotificationsPage() {
             key = 'Today';
         } else if (isYesterday(notif.timestamp)) {
             key = 'Yesterday';
-        } else {
-            key = format(notif.timestamp, 'MMMM d, yyyy');
         }
         if (!acc[key]) {
             acc[key] = [];
@@ -118,6 +135,8 @@ export default function NotificationsPage() {
         acc[key].push(notif);
         return acc;
     }, {});
+    
+    const orderedGroups = ['Today', 'Yesterday', 'Older'].filter(group => groupedNotifications[group]);
 
     const handleMarkAllAsRead = () => {
         setNotifications((prev: Notification[]) => prev.map(n => n.userId === currentUserId ? { ...n, isRead: true } : n));
@@ -138,11 +157,11 @@ export default function NotificationsPage() {
                                 <p className="text-muted-foreground">You have no new notifications.</p>
                             </div>
                         ) : (
-                           Object.entries(groupedNotifications).map(([group, notifs]) => (
+                           orderedGroups.map((group) => (
                                <div key={group} className="border-t">
                                    <h3 className="text-sm font-semibold text-muted-foreground px-6 py-3 bg-muted/50">{group}</h3>
                                    <div className="flex flex-col">
-                                    {notifs.map((notification) => (
+                                    {groupedNotifications[group].map((notification) => (
                                         <NotificationItem
                                             key={notification.id}
                                             notification={notification}

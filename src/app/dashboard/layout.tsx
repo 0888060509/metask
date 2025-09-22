@@ -77,19 +77,21 @@ export default function DashboardLayout({
                 <SidebarInset>
                     {children}
                 </SidebarInset>
-                <TaskDetailDialog 
-                    task={selectedTask}
-                    projects={projects}
-                    tags={tags}
-                    onOpenChange={(isOpen) => {
-                        if (!isOpen) {
-                            setSelectedTask(null);
-                        }
-                    }}
-                    onUpdate={() => {}}
-                    onDelete={() => {}}
-                    onComment={() => {}}
-                />
+                {selectedTask && (
+                    <TaskDetailDialog 
+                        task={selectedTask}
+                        projects={projects}
+                        tags={tags}
+                        onOpenChange={(isOpen) => {
+                            if (!isOpen) {
+                                setSelectedTask(null);
+                            }
+                        }}
+                        onUpdate={() => {}}
+                        onDelete={() => {}}
+                        onComment={() => {}}
+                    />
+                )}
             </SidebarProvider>
         </DashboardContext.Provider>
     );
