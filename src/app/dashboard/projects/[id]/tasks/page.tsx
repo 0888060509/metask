@@ -38,18 +38,16 @@ function ProjectTabs({ projectId }: { projectId: string }) {
     const isDashboard = !pathname.endsWith('/tasks');
 
     return (
-        <div className="px-4 md:px-6">
-            <Tabs value={isDashboard ? 'dashboard' : 'tasks'} className="w-full">
-                <TabsList>
-                    <TabsTrigger value="dashboard" asChild>
-                        <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
-                    </TabsTrigger>
-                    <TabsTrigger value="tasks" asChild>
-                        <Link href={`/dashboard/projects/${projectId}/tasks`}>Tasks</Link>
-                    </TabsTrigger>
-                </TabsList>
-            </Tabs>
-        </div>
+        <Tabs value={isDashboard ? 'dashboard' : 'tasks'} className="w-full">
+            <TabsList>
+                <TabsTrigger value="dashboard" asChild>
+                    <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
+                </TabsTrigger>
+                <TabsTrigger value="tasks" asChild>
+                    <Link href={`/dashboard/projects/${projectId}/tasks`}>Tasks</Link>
+                </TabsTrigger>
+            </TabsList>
+        </Tabs>
     );
 }
 
@@ -182,8 +180,9 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
     <div className="flex h-full flex-col">
       <AppHeader 
         title={project.name}
-      />
-      <ProjectTabs projectId={project.id} />
+      >
+        <ProjectTabs projectId={project.id} />
+      </AppHeader>
       <KanbanToolbar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
