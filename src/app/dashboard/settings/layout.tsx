@@ -28,7 +28,7 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
                         key={item.href}
                         href={item.href}
                         className={cn(
-                        "px-4 py-2 rounded-lg hover:bg-muted hover:text-foreground",
+                        "px-3 py-1.5 rounded-lg hover:bg-muted hover:text-foreground",
                         pathname === item.href && "bg-muted font-semibold text-foreground"
                         )}
                     >
