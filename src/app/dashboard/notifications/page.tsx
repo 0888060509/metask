@@ -136,7 +136,7 @@ function NotificationItem({ notification, onNotificationClick, onMarkAsRead }: N
         <div className="flex-1">
             <p className="text-sm text-foreground">{getNotificationText(notification, actor, task)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-                {isClient && formatDistanceToNowStrict(notification.timestamp, { addSuffix: true })}
+                {isClient ? formatDistanceToNowStrict(notification.timestamp, { addSuffix: true }) : null}
             </p>
             {getNotificationContext(notification, task)}
         </div>

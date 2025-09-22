@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from "react";
@@ -85,7 +86,7 @@ function DeadlineHealthCard({ tasks, onTaskClick }: { tasks: Task[], onTaskClick
                              <div key={task.id} className="flex justify-between items-center">
                                 <button onClick={() => onTaskClick(task)} className="hover:underline text-left truncate pr-4">{task.title}</button>
                                 <span className="text-red-500 font-medium">
-                                    {isClient && formatDistanceToNow(task.deadline!, { addSuffix: true })}
+                                    {isClient ? formatDistanceToNow(task.deadline!, { addSuffix: true }) : null}
                                 </span>
                             </div>
                         ))}
@@ -103,7 +104,7 @@ function DeadlineHealthCard({ tasks, onTaskClick }: { tasks: Task[], onTaskClick
                              <div key={task.id} className="flex justify-between items-center">
                                 <button onClick={() => onTaskClick(task)} className="hover:underline text-left truncate pr-4">{task.title}</button>
                                 <span className="text-yellow-500 font-medium">
-                                     {isClient && formatDistanceToNow(task.deadline!, { addSuffix: true })}
+                                     {isClient ? formatDistanceToNow(task.deadline!, { addSuffix: true }) : null}
                                 </span>
                             </div>
                         ))}

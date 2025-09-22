@@ -165,7 +165,7 @@ const CommentItem = ({
             <div className="flex-1">
                 <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm">{commentUser?.name}</p>
-                    <p className="text-xs text-muted-foreground">{isClient && formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
+                    <p className="text-xs text-muted-foreground">{isClient ? formatDistanceToNow(comment.createdAt, { addSuffix: true }) : null}</p>
                 </div>
                 {isEditing ? (
                      <div className="mt-2">
@@ -647,7 +647,7 @@ export function TaskDetailDialog({
                                         <div className="flex-1 text-sm">
                                         <p className="break-words">{activity.details}</p>
                                         <p className="text-xs text-muted-foreground mt-0.5">
-                                            {isClient && formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                                            {isClient ? formatDistanceToNow(activity.timestamp, { addSuffix: true }) : null}
                                         </p>
                                         </div>
                                     </div>
