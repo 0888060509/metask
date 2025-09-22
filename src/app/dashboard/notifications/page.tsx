@@ -9,7 +9,7 @@ import { tasks, users } from "@/lib/data";
 import { Notification, Task, User } from "@/lib/types";
 import { format, formatDistanceToNowStrict, isToday, isYesterday } from "date-fns";
 import { cn } from "@/lib/utils";
-import { MessageSquare, UserPlus, CheckCircle } from "lucide-react";
+import { MessageSquare, UserPlus, CheckCircle, AtSign } from "lucide-react";
 import { DashboardContext } from "../layout";
 
 type NotificationItemProps = {
@@ -21,6 +21,7 @@ const notificationIcons = {
   comment: MessageSquare,
   assignment: UserPlus,
   status_change: CheckCircle,
+  mention: AtSign,
 };
 
 const getNotificationText = (notification: Notification, actor?: User, task?: Task) => {
@@ -34,6 +35,8 @@ const getNotificationText = (notification: Notification, actor?: User, task?: Ta
             return <>{actorName} assigned you to {taskTitle}.</>;
         case 'status_change':
              return <>{actorName} updated the status of {taskTitle}.</>;
+        case 'mention':
+            return <>{actorName} mentioned you in a comment on {taskTitle}.</>;
         default:
             return "You have a new notification.";
     }

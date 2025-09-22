@@ -19,10 +19,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { tasks as initialTasks, projects as initialProjects, tags as initialTags, notifications as initialNotifications } from "@/lib/data";
+import { tasks as initialTasks, projects as initialProjects, tags as initialTags, notifications as initialNotifications, users } from "@/lib/data";
 import type { Task, TaskPriority, Project, Comment, Tag, Notification } from "@/lib/types";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
+import { DashboardContext } from "./dashboard/layout";
 
 export type Filters = {
   projects: string[];
@@ -52,8 +53,10 @@ export default function Home() {
   });
   
   // This would be the ID of the currently logged-in user.
-  const currentUserId = "user-4";
-  const unreadCount = notifications.filter(n => n.userId === currentUserId && !n.isRead).length;
+  const currentUserId = "user-1"; // Changed for testing mentions
+  const dashboardContext = React.useContext(DashboardContext);
+
+  const unreadCount = dashboardContext?.notifications.filter(n => n.userId === "user-4" && !n.isRead).length ?? 0;
 
   // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
@@ -63,7 +66,7 @@ export default function Home() {
       status: "todo",
       comments: [],
       activity: [
-        { id: `act-${Date.now()}`, userId: 'user-1', activityType: 'create', timestamp: new Date(), details: 'You created the task.' }
+        { id: `act-${Date.now()}`, userId: currentUserId, activityType: 'create', timestamp: new Date(), details: 'You created the task.' }
       ],
     };
     setTasks((prevTasks) => [...prevTasks, taskWithId]);
@@ -132,7 +135,7 @@ export default function Home() {
     const newComment: Comment = {
       id: `comment-${Date.now()}`,
       taskId,
-      userId: "user-1", // Mocking current user
+      userId: currentUserId,
       text: commentText,
       createdAt: new Date(),
       parentId,
@@ -155,6 +158,24 @@ export default function Home() {
       });
       return newTasks;
     });
+
+    // Handle mentions
+    const mentions = commentText.match(/@(\w+\s\w+)/g) || [];
+    if (mentions.length > 0 && dashboardContext) {
+      const { addNotification, users } = dashboardContext;
+      mentions.forEach(mention => {
+        const userName = mention.substring(1);
+        const mentionedUser = users.find(u => u.name === userName);
+        if (mentionedUser && mentionedUser.id !== currentUserId) {
+          addNotification({
+            userId: mentionedUser.id,
+            actorId: currentUserId,
+            type: 'mention',
+            taskId: taskId,
+          });
+        }
+      });
+    }
   };
 
   const filteredTasks = React.useMemo(() => {

@@ -22,9 +22,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { tasks as initialTasks, projects as allProjects, tags as initialTags, notifications as initialNotifications } from "@/lib/data";
+import { tasks as initialTasks, projects as allProjects, tags as initialTags } from "@/lib/data";
 import type { Task, TaskPriority, Project, Comment, Tag, Notification } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardContext } from "../../../layout";
 
 export type Filters = {
   assignees: string[];
@@ -66,6 +67,9 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
     priorities: [],
     tags: [],
   });
+  
+  const currentUserId = "user-1"; // Changed for testing mentions
+  const dashboardContext = React.useContext(DashboardContext);
 
   // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
@@ -75,7 +79,7 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
       status: "todo",
       comments: [],
       activity: [
-        { id: `act-${Date.now()}`, userId: 'user-1', activityType: 'create', timestamp: new Date(), details: 'You created the task.' }
+        { id: `act-${Date.now()}`, userId: currentUserId, activityType: 'create', timestamp: new Date(), details: 'You created the task.' }
       ],
     };
     setTasks((prevTasks) => [...prevTasks, taskWithId]);
@@ -103,7 +107,7 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
     const newComment: Comment = {
       id: `comment-${Date.now()}`,
       taskId,
-      userId: "user-1", // Mocking current user
+      userId: currentUserId,
       text: commentText,
       createdAt: new Date(),
       parentId,
@@ -126,6 +130,24 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
       });
       return newTasks;
     });
+
+    // Handle mentions
+    const mentions = commentText.match(/@(\w+\s\w+)/g) || [];
+    if (mentions.length > 0 && dashboardContext) {
+      const { addNotification, users } = dashboardContext;
+      mentions.forEach(mention => {
+        const userName = mention.substring(1);
+        const mentionedUser = users.find(u => u.name === userName);
+        if (mentionedUser && mentionedUser.id !== currentUserId) {
+          addNotification({
+            userId: mentionedUser.id,
+            actorId: currentUserId,
+            type: 'mention',
+            taskId: taskId,
+          });
+        }
+      });
+    }
   };
 
   const filteredTasks = React.useMemo(() => {
@@ -147,7 +169,7 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
         (task.tagIds && task.tagIds.some(id => filters.tags.includes(id)));
       return searchMatch && assigneeMatch && priorityMatch && tagMatch;
     });
-  }, [tasks, filters, searchQuery, params]);
+  }, [tasks, filters, searchQuery, params.id]);
 
   return (
     <div className="flex h-full flex-col">

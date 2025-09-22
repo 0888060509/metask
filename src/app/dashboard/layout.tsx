@@ -3,8 +3,8 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { tasks as initialTasks, projects as initialProjects, tags as initialTags, notifications as initialNotifications } from "@/lib/data";
-import { Project, Tag, Task, Notification } from "@/lib/types";
+import { tasks as initialTasks, projects as initialProjects, tags as initialTags, notifications as initialNotifications, users } from "@/lib/data";
+import { Project, Tag, Task, Notification, User } from "@/lib/types";
 import React from "react";
 import { TaskDetailDialog } from "@/components/kanban/task-detail-dialog";
 
@@ -12,6 +12,8 @@ export const DashboardContext = React.createContext<{
     notifications: Notification[];
     setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
     handleOpenTaskFromNotification: (taskId: string) => void;
+    addNotification: (notification: Omit<Notification, "id" | "timestamp" | "isRead">) => void;
+    users: User[];
 } | null>(null);
 
 
@@ -44,10 +46,22 @@ export default function DashboardLayout({
         setNotifications(prev => prev.map(n => n.taskId === taskId ? { ...n, isRead: true } : n));
     };
 
+    const addNotification = (notification: Omit<Notification, "id" | "timestamp" | "isRead">) => {
+        const newNotification: Notification = {
+            ...notification,
+            id: `notif-${Date.now()}`,
+            timestamp: new Date(),
+            isRead: false,
+        };
+        setNotifications(prev => [newNotification, ...prev]);
+    }
+
     const contextValue = {
         notifications,
         setNotifications,
         handleOpenTaskFromNotification,
+        addNotification,
+        users,
     };
 
     return (
