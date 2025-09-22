@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -22,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { tasks as initialTasks, projects as initialProjects, tags as initialTags, notifications as initialNotifications } from "@/lib/data";
+import { tasks as initialTasks, projects as allProjects, tags as initialTags, notifications as initialNotifications } from "@/lib/data";
 import type { Task, TaskPriority, Project, Comment, Tag, Notification } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -52,10 +51,9 @@ function ProjectTabs({ projectId }: { projectId: string }) {
     );
 }
 
-
-export default function ProjectTasksPage({ params }: { params: { id: string } }) {
+function ProjectTasksClient({ project, params }: { project: Project; params: { id: string } }) {
   const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
-  const [projects, setProjects] = React.useState<Project[]>(initialProjects);
+  const [projects, setProjects] = React.useState<Project[]>(allProjects);
   const [tags, setTags] = React.useState<Tag[]>(initialTags);
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
@@ -67,11 +65,6 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
     priorities: [],
     tags: [],
   });
-
-  const project = projects.find(p => p.id === params.id);
-  if (!project) {
-    notFound();
-  }
 
   // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
@@ -151,7 +144,7 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
         (task.tagIds && task.tagIds.some(id => filters.tags.includes(id)));
       return searchMatch && assigneeMatch && priorityMatch && tagMatch;
     });
-  }, [tasks, filters, searchQuery, params]);
+  }, [tasks, filters, searchQuery, params.id]);
 
   return (
     <div className="flex h-full flex-col">
@@ -204,4 +197,13 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
   );
 }
 
+// This is the new Server Component wrapper
+export default function ProjectTasksPage({ params }: { params: { id: string } }) {
+    const project = allProjects.find(p => p.id === params.id);
+    
+    if (!project) {
+        notFound();
+    }
 
+    return <ProjectTasksClient project={project} params={params} />;
+}
