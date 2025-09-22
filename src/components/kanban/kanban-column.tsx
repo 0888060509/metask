@@ -10,9 +10,10 @@ type KanbanColumnProps = {
   status: TaskStatus;
   tasks: Task[];
   onTaskDrop: (taskId: string, newStatus: TaskStatus) => void;
+  onTaskClick: (task: Task) => void;
 };
 
-export function KanbanColumn({ title, status, tasks, onTaskDrop }: KanbanColumnProps) {
+export function KanbanColumn({ title, status, tasks, onTaskDrop, onTaskClick }: KanbanColumnProps) {
   const [isOver, setIsOver] = React.useState(false);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -50,7 +51,7 @@ export function KanbanColumn({ title, status, tasks, onTaskDrop }: KanbanColumnP
       </div>
       <div className="flex flex-1 flex-col gap-4 p-4">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onTaskClick={onTaskClick} />
         ))}
         {tasks.length === 0 && (
             <div className="flex h-32 items-center justify-center rounded-lg bg-muted/50">

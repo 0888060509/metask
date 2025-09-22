@@ -7,6 +7,7 @@ import { KanbanColumn } from "./kanban-column";
 type KanbanBoardProps = {
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  onTaskClick: (task: Task) => void;
 };
 
 const columns: { id: TaskStatus; title: string }[] = [
@@ -15,7 +16,7 @@ const columns: { id: TaskStatus; title: string }[] = [
   { id: "done", title: "Done" },
 ];
 
-export function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, setTasks, onTaskClick }: KanbanBoardProps) {
   const onTaskDrop = (taskId: string, newStatus: TaskStatus) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
@@ -33,6 +34,7 @@ export function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
           title={column.title}
           tasks={tasks.filter((task) => task.status === column.id)}
           onTaskDrop={onTaskDrop}
+          onTaskClick={onTaskClick}
         />
       ))}
     </div>

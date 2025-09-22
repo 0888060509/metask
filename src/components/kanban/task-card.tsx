@@ -24,6 +24,7 @@ import { Calendar, Edit, Flag, MoreHorizontal, Trash2 } from "lucide-react";
 
 type TaskCardProps = {
   task: Task;
+  onTaskClick: (task: Task) => void;
 };
 
 const priorityClasses: Record<Task["priority"], string> = {
@@ -32,7 +33,7 @@ const priorityClasses: Record<Task["priority"], string> = {
   high: "border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400",
 };
 
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, onTaskClick }: TaskCardProps) {
   const assignee = users.find((user) => user.id === task.assigneeId);
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData("text/plain", task.id);
@@ -42,7 +43,8 @@ export function TaskCard({ task }: TaskCardProps) {
     <Card 
       draggable 
       onDragStart={handleDragStart}
-      className="cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow"
+      onClick={() => onTaskClick(task)}
+      className="cursor-pointer active:cursor-grabbing hover:shadow-md transition-shadow"
     >
       <CardHeader className="flex-row items-start justify-between gap-4">
         <div className="space-y-1">
@@ -52,14 +54,20 @@ export function TaskCard({ task }: TaskCardProps) {
           )}
         </div>
         <DropdownMenu>
-          <DropdownMenuTrigger className="-mt-1.5 -mr-2.5 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+          <DropdownMenuTrigger
+            onClick={(e) => e.stopPropagation()}
+            className="-mt-1.5 -mr-2.5 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          >
             <MoreHorizontal className="h-5 w-5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
               <Edit className="mr-2 h-4 w-4" /> Edit
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/40">
+            <DropdownMenuItem 
+              onClick={(e) => e.stopPropagation()}
+              className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/40"
+            >
               <Trash2 className="mr-2 h-4 w-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

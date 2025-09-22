@@ -33,12 +33,12 @@ type TaskDialogProps = {
 };
 
 export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps) {
-  const [title, setTitle] = React.useState(task?.title || "");
-  const [description, setDescription] = React.useState(task?.description || "");
-  const [assigneeId, setAssigneeId] = React.useState(task?.assigneeId);
-  const [projectId, setProjectId] = React.useState(task?.projectId || "");
-  const [priority, setPriority] = React.useState<TaskPriority>(task?.priority || "medium");
-  const [deadline, setDeadline] = React.useState<Date | undefined>(task?.deadline);
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [assigneeId, setAssigneeId] = React.useState<string | undefined>();
+  const [projectId, setProjectId] = React.useState("");
+  const [priority, setPriority] = React.useState<TaskPriority>("medium");
+  const [deadline, setDeadline] = React.useState<Date | undefined>();
 
   const handleSave = () => {
     if (!title || !projectId) {
