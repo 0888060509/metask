@@ -5,7 +5,7 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { projects as allProjects, tasks as allTasks } from "@/lib/data";
+import { projects, tasks as allTasks } from "@/lib/data";
 import { Task, Project } from "@/lib/types";
 import { notFound } from 'next/navigation';
 import { differenceInBusinessDays, formatDistanceToNow, isAfter, isBefore } from "date-fns";
@@ -139,8 +139,8 @@ function ProjectDashboardClient({ project, projectTasks }: { project: Project, p
 
     return (
         <div className="flex h-full flex-col">
-             <AppHeader title={project.name} />
-            <div className="border-b px-4 py-2">
+            <AppHeader title={project.name} />
+             <div className="border-b px-4 py-2">
                 <Tabs value={'dashboard'}>
                     <ProjectTabs projectId={project.id} />
                 </Tabs>
@@ -191,7 +191,7 @@ function ProjectDashboardClient({ project, projectTasks }: { project: Project, p
 
 // This is the new Server Component wrapper
 export default function ProjectDashboardPage({ params }: { params: { id: string } }) {
-    const project = allProjects.find(p => p.id === params.id);
+    const project = projects.find(p => p.id === params.id);
     if (!project) {
         notFound();
     }

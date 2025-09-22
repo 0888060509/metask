@@ -10,7 +10,7 @@ import { AppHeader } from "@/components/app-header";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
-import { projects as allProjects } from "@/lib/data";
+import { projects } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardContext } from "../../../layout";
@@ -38,7 +38,7 @@ function ProjectTasksClient({ project }: { project: Project }) {
   const context = React.useContext(DashboardContext);
     
   if (!context) return null;
-  const { tasks, setTasks, openTask, tags, projects } = context;
+  const { tasks, setTasks, openTask, tags } = context;
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
 
@@ -91,7 +91,7 @@ function ProjectTasksClient({ project }: { project: Project }) {
       <AppHeader 
         title={project.name}
       />
-      <div className="border-b px-4 py-2">
+       <div className="border-b px-4 py-2">
         <Tabs value={'tasks'}>
           <ProjectTabs projectId={project.id} />
         </Tabs>
@@ -130,7 +130,7 @@ function ProjectTasksClient({ project }: { project: Project }) {
 
 // This is the new Server Component wrapper
 export default function ProjectTasksPage({ params }: { params: { id: string } }) {
-    const project = allProjects.find(p => p.id === params.id);
+    const project = projects.find(p => p.id === params.id);
     
     if (!project) {
         notFound();
