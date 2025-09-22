@@ -4,7 +4,6 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tasks, users } from "@/lib/data";
 import { Notification, Task, User } from "@/lib/types";
@@ -84,13 +83,10 @@ export default function NotificationsPage() {
     const context = React.useContext(DashboardContext);
 
     if (!context) {
-        // This can happen if the page is rendered outside the layout with the context provider.
-        // You might want to show a loading state or an error message.
         return <div>Loading...</div>;
     }
     const { notifications, setNotifications, handleOpenTaskFromNotification } = context;
 
-    // This would be the ID of the currently logged-in user.
     const currentUserId = "user-4";
 
     const userNotifications = notifications

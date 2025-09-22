@@ -86,7 +86,7 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/notifications")}>
+            <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/notifications") && !pathname.startsWith("/dashboard/settings")}>
               <Link href="/dashboard/notifications">
                 <Bell />
                 Notifications
