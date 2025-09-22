@@ -1,7 +1,7 @@
 "use client";
 
-import { users } from "@/lib/data";
-import type { Task, TaskPriority, Project } from "@/lib/types";
+import { users, tags } from "@/lib/data";
+import type { Task, TaskPriority, Project, Tag } from "@/lib/types";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { MultiSelectCombobox } from "../ui/multi-select-combobox";
 
 type TaskDialogProps = {
   open: boolean;
@@ -40,6 +41,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
   const [projectId, setProjectId] = React.useState("");
   const [priority, setPriority] = React.useState<TaskPriority>("medium");
   const [deadline, setDeadline] = React.useState<Date | undefined>();
+  const [tagIds, setTagIds] = React.useState<string[]>([]);
 
   const handleSave = () => {
     if (!title || !projectId) {
@@ -54,6 +56,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
       projectId,
       priority,
       deadline,
+      tagIds,
     });
     onOpenChange(false);
   };
@@ -66,11 +69,14 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
         setProjectId(task?.projectId || "");
         setPriority(task?.priority || 'medium');
         setDeadline(task?.deadline);
+        setTagIds(task?.tagIds || []);
     }
   }, [open, task]);
   
   const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
   const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
+  const tagOptions = React.useMemo(() => tags.map(tag => ({ value: tag.id, label: tag.name })), []);
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -147,6 +153,20 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
               Deadline
             </Label>
             <DatePicker date={deadline} setDate={setDeadline} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-start gap-4">
+             <Label htmlFor="tags" className="text-right pt-2">
+              Tags
+            </Label>
+            <MultiSelectCombobox
+              className="col-span-3"
+              options={tagOptions}
+              selected={tagIds}
+              onSelectedChange={setTagIds}
+              placeholder="Select tags"
+              searchPlaceholder="Search tags..."
+              emptyResult="No tags found."
+            />
           </div>
         </div>
         <DialogFooter>

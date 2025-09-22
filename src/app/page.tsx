@@ -205,7 +205,12 @@ export default function Home() {
           <TaskDialog
             open={isEditTaskDialogOpen}
             onOpenChange={setIsEditTaskDialogOpen}
-            onSave={(updatedTask) => handleUpdateTask({...selectedTask, ...updatedTask} as Task)}
+            onSave={(updatedTaskData) => {
+              if (selectedTask) {
+                const updatedTask = {...selectedTask, ...updatedTaskData};
+                handleUpdateTask(updatedTask);
+              }
+            }}
             task={selectedTask ?? undefined}
             projects={projects}
           />

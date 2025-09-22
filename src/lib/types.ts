@@ -17,6 +17,12 @@ export type Activity = {
   details: string;
 };
 
+export type Tag = {
+  id: string;
+  name: string;
+  color: `bg-${string}-500/10 text-${string}-700 dark:text-${string}-400`;
+}
+
 export type Task = {
   id: string;
   title: string;
@@ -26,7 +32,7 @@ export type Task = {
   deadline?: Date;
   assigneeId?: string;
   projectId: string;
-  tags?: string[];
+  tagIds?: string[];
   comments?: Comment[];
   activity?: Activity[];
 };

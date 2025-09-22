@@ -2,8 +2,8 @@
 "use client";
 
 import React from "react";
-import { users } from "@/lib/data";
-import type { Task, TaskPriority, Project } from "@/lib/types";
+import { users, tags } from "@/lib/data";
+import type { Task, TaskPriority, Project, Tag } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -21,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -32,7 +30,7 @@ import {
   Flag,
   User,
   Folder,
-  Tag,
+  Tag as TagIcon,
   CheckCircle,
   Edit,
   MoreVertical,
@@ -104,7 +102,7 @@ export function TaskDetailDialog({
   onComment,
 }: TaskDetailSheetProps) {
   const [commentText, setCommentText] = React.useState("");
-
+  
   const assignee = task ? users.find((user) => user.id === task.assigneeId) : null;
   const project = task ? projects.find((p) => p.id === task.projectId) : null;
   const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
@@ -129,8 +127,14 @@ export function TaskDetailDialog({
   };
 
   const sortedActivity = React.useMemo(() => {
-    return task?.activity?.slice().sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    if (!task?.activity) return [];
+    return task.activity.slice().sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }, [task?.activity]);
+  
+  const taskTags = React.useMemo(() => {
+    if (!task?.tagIds) return [];
+    return task.tagIds.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as Tag[];
+  }, [task?.tagIds]);
 
 
   return (
@@ -224,12 +228,12 @@ export function TaskDetailDialog({
                               </DetailRow>
                           )}
 
-                          {task.tags && task.tags.length > 0 && (
-                              <DetailRow icon={Tag} label="Tags">
+                          {taskTags && taskTags.length > 0 && (
+                              <DetailRow icon={TagIcon} label="Tags">
                               <div className="flex flex-wrap gap-2">
-                                  {task.tags.map((tag) => (
-                                  <Badge key={tag} variant="secondary">
-                                      {tag}
+                                  {taskTags.map((tag) => (
+                                  <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.color)}>
+                                      {tag.name}
                                   </Badge>
                                   ))}
                               </div>

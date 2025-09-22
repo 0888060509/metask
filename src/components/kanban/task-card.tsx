@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { users } from "@/lib/data";
-import type { Task, Project } from "@/lib/types";
+import { users, tags } from "@/lib/data";
+import type { Task, Project, Tag } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -42,6 +42,7 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
   };
   
   const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : null;
+  const taskTags = task.tagIds?.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as Tag[];
 
   return (
     <Card 
@@ -70,9 +71,9 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
           <Flag className="mr-1.5 h-3 w-3" />
           {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
         </Badge>
-        {task.tags?.map((tag) => (
-          <Badge key={tag} variant="secondary">
-            {tag}
+        {taskTags?.map((tag) => (
+          <Badge key={tag.id} variant="outline" className={cn("text-xs", tag.color)}>
+            {tag.name}
           </Badge>
         ))}
       </CardContent>
