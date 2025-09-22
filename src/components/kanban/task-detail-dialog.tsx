@@ -40,6 +40,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+  } from "@/components/ui/command";
 
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
@@ -115,7 +133,8 @@ const CommentItem = ({
     const [isReplying, setIsReplying] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [replyText, setReplyText] = React.useState("");
-    const [editText, setEditText] = React.useState(comment.text);
+    const [editText, setEditText] = React.useStatre(comment.text);
+    const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
 
     const handleReply = () => {
         onReply(comment.id, replyText);
@@ -165,7 +184,7 @@ const CommentItem = ({
                         <PopoverContent className="w-auto p-1">
                             <div className="flex gap-1">
                                 {availableReactions.map(emoji => (
-                                    <Button key={emoji} variant={userHasReacted(emoji) ? "outline-primary" : "ghost"} size="icon" className="h-8 w-8 text-lg" onClick={() => onAddReaction(comment.id, emoji)}>
+                                    <Button key={emoji} variant={userHasReacted(emoji) ? "outline" : "ghost"} size="icon" className={cn("h-8 w-8 text-lg", userHasReacted(emoji) && "border-primary bg-primary/10")}>
                                         {emoji}
                                     </Button>
                                 ))}
@@ -180,7 +199,7 @@ const CommentItem = ({
                         <Button size="xs" variant="ghost" className="text-muted-foreground" onClick={() => setIsEditing(!isEditing)}>
                             <Edit className="h-4 w-4 mr-1"/> Edit
                         </Button>
-                         <Button size="xs" variant="ghost" className="text-red-500 hover:text-red-500" onClick={() => onDelete(comment.id)}>
+                         <Button size="xs" variant="ghost" className="text-red-500 hover:text-red-500" onClick={() => setIsDeleteAlertOpen(true)}>
                             <Trash2 className="h-4 w-4 mr-1"/> Delete
                         </Button>
                         </>
@@ -195,8 +214,8 @@ const CommentItem = ({
                         }, {} as Record<string, number>)).map(([emoji, count]) => (
                             <Badge 
                                 key={emoji} 
-                                variant={userHasReacted(emoji) ? "outline-primary" : "secondary"}
-                                className="cursor-pointer"
+                                variant={userHasReacted(emoji) ? "outline" : "secondary"}
+                                className={cn("cursor-pointer", userHasReacted(emoji) && "border-primary bg-primary/10")}
                                 onClick={() => onAddReaction(comment.id, emoji)}
                             >
                                 {emoji} {count}
@@ -229,11 +248,133 @@ const CommentItem = ({
                         />
                     ))}
                 </div>
+
+                <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure you want to delete this comment?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the comment.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onDelete(comment.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     )
 }
 
+function CommentBox({ onComment, currentUserId }: { onComment: (text: string) => void, currentUserId: string }) {
+    const [text, setText] = React.useState('');
+    const [mentionPopoverOpen, setMentionPopoverOpen] = React.useState(false);
+    const [mentionQuery, setMentionQuery] = React.useState('');
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newText = e.target.value;
+      setText(newText);
+  
+      const cursorPos = e.target.selectionStart;
+      const textBeforeCursor = newText.substring(0, cursorPos);
+      const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+  
+      if (mentionMatch) {
+        setMentionPopoverOpen(true);
+        setMentionQuery(mentionMatch[1]);
+      } else {
+        setMentionPopoverOpen(false);
+      }
+    };
+  
+    const handleMentionSelect = (userName: string) => {
+      if (textareaRef.current) {
+        const cursorPos = textareaRef.current.selectionStart;
+        const textBeforeCursor = text.substring(0, cursorPos);
+        const textAfterCursor = text.substring(cursorPos);
+  
+        const textUntilMention = textBeforeCursor.replace(/@(\w*)$/, '');
+        
+        const newText = `${textUntilMention}@${userName} ${textAfterCursor}`;
+        setText(newText);
+        setMentionPopoverOpen(false);
+
+        // Move cursor after the mention
+        setTimeout(() => {
+          textareaRef.current?.focus();
+          const newCursorPos = (textUntilMention + `@${userName} `).length;
+          textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+        }, 0);
+      }
+    };
+
+    const handleSend = () => {
+        onComment(text);
+        setText("");
+    }
+  
+    const filteredUsers = users.filter(user => 
+        user.id !== currentUserId && 
+        user.name.toLowerCase().includes(mentionQuery.toLowerCase())
+    );
+  
+    return (
+      <Popover open={mentionPopoverOpen} onOpenChange={setMentionPopoverOpen}>
+        <PopoverTrigger asChild>
+          <div className="relative">
+            <Textarea
+              ref={textareaRef}
+              placeholder="Add a comment... Type '@' to mention a user."
+              className="pr-12"
+              value={text}
+              onChange={handleTextChange}
+              onKeyDown={(e) => {
+                if (mentionPopoverOpen) return; // Let popover handle key events
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
+             <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSend} disabled={!text.trim()}>
+                <Send className="h-4 w-4"/>
+                <span className="sr-only">Send Comment</span>
+            </Button>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-64 p-0">
+          <Command>
+            <CommandInput 
+                placeholder="Mention a team member..." 
+                value={mentionQuery}
+                onValueChange={setMentionQuery}
+             />
+            <CommandList>
+              <CommandEmpty>No users found.</CommandEmpty>
+              <CommandGroup>
+                {filteredUsers.map(user => (
+                  <CommandItem
+                    key={user.id}
+                    value={user.name}
+                    onSelect={() => handleMentionSelect(user.name)}
+                  >
+                     <Avatar className="mr-2 h-6 w-6">
+                        <AvatarImage src={user.avatarUrl} />
+                        <AvatarFallback>{user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    {user.name}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+}
 
 export function TaskDetailDialog({
   task,
@@ -244,7 +385,6 @@ export function TaskDetailDialog({
   onDelete,
   onComment,
 }: TaskDetailSheetProps) {
-  const [commentText, setCommentText] = React.useState("");
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedTask, setEditedTask] = React.useState<Partial<Task>>({});
   
@@ -283,7 +423,6 @@ export function TaskDetailDialog({
   const handleSendComment = (text: string, parentId: string | null = null) => {
     if (task && text.trim()) {
       onComment(task.id, text, parentId);
-      setCommentText(""); // Clear main comment box
     }
   };
 
@@ -453,19 +592,7 @@ export function TaskDetailDialog({
                         </TabsList>
                         <TabsContent value="comments">
                              <div className="space-y-4 mt-4">
-                                <div className="relative">
-                                    <Textarea 
-                                        placeholder="Add a comment..." 
-                                        className="pr-12"
-                                        value={commentText}
-                                        onChange={(e) => setCommentText(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(commentText); } }}
-                                    />
-                                    <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => handleSendComment(commentText)}>
-                                        <Send className="h-4 w-4"/>
-                                        <span className="sr-only">Send Comment</span>
-                                    </Button>
-                                </div>
+                                <CommentBox onComment={(text) => handleSendComment(text)} currentUserId={currentUserId} />
                                 
                                 {rootComments && rootComments.length > 0 ? (
                                     <div className="space-y-4">
@@ -651,3 +778,5 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
+
+    
