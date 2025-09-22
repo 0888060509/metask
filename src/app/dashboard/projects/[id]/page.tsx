@@ -7,16 +7,17 @@ import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tasks as allTasks, projects as allProjects } from "@/lib/data";
 import { Task, Project } from "@/lib/types";
-import { notFound, usePathname } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { differenceInBusinessDays, formatDistanceToNow, isAfter, isBefore } from "date-fns";
 import { BurndownChart } from "@/components/project/burndown-chart";
-import { AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, ListTodo, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardContext } from "../../layout";
 
 
-function TaskAgeingCard({ tasks }: { tasks: Task[] }) {
+function TaskAgeingCard({ tasks, onTaskClick }: { tasks: Task[], onTaskClick: (task: Task) => void }) {
     const inProgressTasks = tasks
         .filter(t => t.status === 'inprogress')
         .map(t => {
@@ -42,7 +43,7 @@ function TaskAgeingCard({ tasks }: { tasks: Task[] }) {
                     <div className="space-y-4">
                         {inProgressTasks.slice(0, 5).map(task => (
                             <div key={task.id} className="flex justify-between items-center text-sm">
-                                <Link href="#" className="hover:underline font-medium truncate pr-4">{task.title}</Link>
+                                <button onClick={() => onTaskClick(task)} className="hover:underline text-left font-medium truncate pr-4">{task.title}</button>
                                 <span className={cn("font-semibold", getAgeColor(task.age))}>{task.age} days</span>
                             </div>
                         ))}
@@ -56,7 +57,7 @@ function TaskAgeingCard({ tasks }: { tasks: Task[] }) {
 }
 
 
-function DeadlineHealthCard({ tasks }: { tasks: Task[] }) {
+function DeadlineHealthCard({ tasks, onTaskClick }: { tasks: Task[], onTaskClick: (task: Task) => void }) {
     const now = new Date();
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
@@ -78,7 +79,7 @@ function DeadlineHealthCard({ tasks }: { tasks: Task[] }) {
                      <div className="space-y-2 text-sm">
                         {overdueTasks.slice(0, 3).map(task => (
                              <div key={task.id} className="flex justify-between items-center">
-                                <Link href="#" className="hover:underline truncate pr-4">{task.title}</Link>
+                                <button onClick={() => onTaskClick(task)} className="hover:underline text-left truncate pr-4">{task.title}</button>
                                 <span className="text-red-500 font-medium">
                                     {formatDistanceToNow(task.deadline!, { addSuffix: true })}
                                 </span>
@@ -96,7 +97,7 @@ function DeadlineHealthCard({ tasks }: { tasks: Task[] }) {
                     <div className="space-y-2 text-sm">
                         {upcomingTasks.slice(0, 3).map(task => (
                              <div key={task.id} className="flex justify-between items-center">
-                                <Link href="#" className="hover:underline truncate pr-4">{task.title}</Link>
+                                <button onClick={() => onTaskClick(task)} className="hover:underline text-left truncate pr-4">{task.title}</button>
                                 <span className="text-yellow-500 font-medium">
                                      {formatDistanceToNow(task.deadline!, { addSuffix: true })}
                                 </span>
@@ -111,30 +112,29 @@ function DeadlineHealthCard({ tasks }: { tasks: Task[] }) {
 }
 
 function ProjectTabs({ projectId }: { projectId: string }) {
-    const pathname = usePathname();
-    const isDashboard = !pathname.endsWith('/tasks');
-
     return (
-        <Tabs value={isDashboard ? 'dashboard' : 'tasks'}>
-            <TabsList>
-                <TabsTrigger value="dashboard" asChild>
-                    <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
-                </TabsTrigger>
-                <TabsTrigger value="tasks" asChild>
-                    <Link href={`/dashboard/projects/${projectId}/tasks`}>Tasks</Link>
-                </TabsTrigger>
-            </TabsList>
-        </Tabs>
+        <TabsList>
+            <TabsTrigger value="dashboard" asChild>
+                <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
+            </TabsTrigger>
+            <TabsTrigger value="tasks" asChild>
+                <Link href={`/dashboard/projects/${projectId}/tasks`}>Tasks</Link>
+            </TabsTrigger>
+        </TabsList>
     );
 }
 
 
 function ProjectDashboardClient({ params }: { params: { id: string } }) {
     const project = allProjects.find(p => p.id === params.id);
+    const context = React.useContext(DashboardContext);
     
     if (!project) {
         notFound();
     }
+    
+    if (!context) return null;
+    const { openTask } = context;
 
     const projectTasks = allTasks.filter(t => t.projectId === params.id);
 
@@ -147,15 +147,17 @@ function ProjectDashboardClient({ params }: { params: { id: string } }) {
     return (
         <div className="flex h-full flex-col">
             <AppHeader title={project.name} />
-             <div className="border-b px-4 py-2">
-                <ProjectTabs projectId={project.id} />
+            <div className="border-b px-4 py-2">
+                <Tabs value={'dashboard'}>
+                    <ProjectTabs projectId={project.id} />
+                </Tabs>
             </div>
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                      <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">To Do</CardTitle>
-                             <Clock className="h-4 w-4 text-muted-foreground" />
+                             <ListTodo className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{tasksByStatus.todo || 0}</div>
@@ -164,7 +166,7 @@ function ProjectDashboardClient({ params }: { params: { id: string } }) {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-                            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                            <PlayCircle className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{tasksByStatus.inprogress || 0}</div>
@@ -185,8 +187,8 @@ function ProjectDashboardClient({ params }: { params: { id: string } }) {
                         <BurndownChart projectTasks={projectTasks} />
                     </div>
                     <div className="space-y-6">
-                       <TaskAgeingCard tasks={projectTasks} />
-                       <DeadlineHealthCard tasks={projectTasks} />
+                       <TaskAgeingCard tasks={projectTasks} onTaskClick={openTask} />
+                       <DeadlineHealthCard tasks={projectTasks} onTaskClick={openTask} />
                     </div>
                 </div>
             </div>

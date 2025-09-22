@@ -7,7 +7,6 @@ import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
-import { TaskDetailDialog } from "@/components/kanban/task-detail-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +18,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { tasks as initialTasks, projects as initialProjects, tags as initialTags, notifications as initialNotifications, users } from "@/lib/data";
-import type { Task, TaskPriority, Project, Comment, Tag, Notification } from "@/lib/types";
+import { projects as initialProjects, notifications as initialNotifications, users } from "@/lib/data";
+import type { Task, TaskPriority, Project } from "@/lib/types";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
 import { DashboardContext } from "./dashboard/layout";
@@ -32,16 +31,14 @@ export type Filters = {
 };
 
 export default function Home() {
-  const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
+  const context = React.useContext(DashboardContext);
+  
   const [projects, setProjects] = React.useState<Project[]>(initialProjects);
-  const [tags, setTags] = React.useState<Tag[]>(initialTags);
-  const [notifications, setNotifications] = React.useState<Notification[]>(initialNotifications);
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
-  const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
   const [selectedProject, setSelectedProject] = React.useState<Project | null>(null);
   const [projectToDelete, setProjectToDelete] = React.useState<Project | null>(null);
 
@@ -52,11 +49,13 @@ export default function Home() {
     priorities: [],
   });
   
-  // This would be the ID of the currently logged-in user.
-  const currentUserId = "user-1"; // Changed for testing mentions
-  const dashboardContext = React.useContext(DashboardContext);
+  if (!context) return null;
+  const { tasks, setTasks, openTask, tags } = context;
 
-  const unreadCount = dashboardContext?.notifications.filter(n => n.userId === "user-4" && !n.isRead).length ?? 0;
+  // This would be the ID of the currently logged-in user.
+  const currentUserId = "user-1";
+
+  const unreadCount = context.notifications.filter(n => n.userId === "user-4" && !n.isRead).length ?? 0;
 
   // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
@@ -70,24 +69,6 @@ export default function Home() {
       ],
     };
     setTasks((prevTasks) => [...prevTasks, taskWithId]);
-  };
-  
-  const handleUpdateTask = (updatedTask: Task) => {
-    setTasks((prevTasks) => prevTasks.map(task => task.id === updatedTask.id ? updatedTask : task));
-    setSelectedTask(updatedTask);
-  }
-
-  const handleDeleteTask = (taskId: string) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
-    setSelectedTask(null);
-  }
-
-  const handleOpenTask = (task: Task) => {
-    setSelectedTask(task);
-  };
-  
-  const handleCloseDetailDialog = () => {
-    setSelectedTask(null);
   };
   
   // Project handlers
@@ -128,53 +109,6 @@ export default function Home() {
       setTasks(tasks.filter(t => t.projectId !== projectToDelete.id));
       setProjectToDelete(null);
       setIsDeleteDialogOpen(false);
-    }
-  };
-
-  const handleAddComment = (taskId: string, commentText: string, parentId?: string | null) => {
-    const newComment: Comment = {
-      id: `comment-${Date.now()}`,
-      taskId,
-      userId: currentUserId,
-      text: commentText,
-      createdAt: new Date(),
-      parentId,
-      reactions: []
-    };
-
-    setTasks(prevTasks => {
-      const newTasks = prevTasks.map(task => {
-        if (task.id === taskId) {
-          const updatedTask = {
-            ...task,
-            comments: [...(task.comments || []), newComment]
-          };
-          if(selectedTask?.id === taskId) {
-            setSelectedTask(updatedTask);
-          }
-          return updatedTask;
-        }
-        return task;
-      });
-      return newTasks;
-    });
-
-    // Handle mentions
-    const mentions = commentText.match(/@(\w+\s\w+)/g) || [];
-    if (mentions.length > 0 && dashboardContext) {
-      const { addNotification, users } = dashboardContext;
-      mentions.forEach(mention => {
-        const userName = mention.substring(1);
-        const mentionedUser = users.find(u => u.name === userName);
-        if (mentionedUser && mentionedUser.id !== currentUserId) {
-          addNotification({
-            userId: mentionedUser.id,
-            actorId: currentUserId,
-            type: 'mention',
-            taskId: taskId,
-          });
-        }
-      });
     }
   };
 
@@ -222,7 +156,7 @@ export default function Home() {
             <KanbanBoard 
               tasks={filteredTasks} 
               setTasks={setTasks} 
-              onTaskClick={handleOpenTask}
+              onTaskClick={openTask}
               projects={projects}
               onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
             />
@@ -233,19 +167,6 @@ export default function Home() {
             onSave={handleCreateTask}
             projects={projects}
             tags={tags}
-          />
-         <TaskDetailDialog 
-            task={selectedTask}
-            projects={projects}
-            tags={tags}
-            onOpenChange={(isOpen) => {
-                if (!isOpen) {
-                    handleCloseDetailDialog();
-                }
-            }}
-            onUpdate={handleUpdateTask}
-            onDelete={handleDeleteTask}
-            onComment={handleAddComment}
           />
           <ProjectDialog 
             open={isProjectDialogOpen}

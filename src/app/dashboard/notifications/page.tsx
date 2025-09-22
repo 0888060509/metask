@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 
 type NotificationItemProps = {
   notification: Notification;
-  onNotificationClick: (taskId: string) => void;
+  onNotificationClick: (task: Task) => void;
   onMarkAsRead: (notificationId: string) => void;
 };
 
@@ -115,7 +115,7 @@ function NotificationItem({ notification, onNotificationClick, onMarkAsRead }: N
 
       <div
         className={cn("flex-1 flex items-start gap-4 pl-4 cursor-pointer", notification.isRead && "opacity-60 hover:opacity-100 transition-opacity")}
-        onClick={() => notification.taskId && onNotificationClick(notification.taskId)}
+        onClick={() => notification.taskId && task && onNotificationClick(task)}
       >
         <div className="relative h-10 w-10 shrink-0">
              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-muted">
@@ -151,7 +151,7 @@ export default function NotificationsPage() {
     if (!context) {
         return <div>Loading...</div>;
     }
-    const { notifications, setNotifications, handleOpenTaskFromNotification } = context;
+    const { notifications, setNotifications, openTask } = context;
 
     const currentUserId = "user-4";
 
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
     const unreadFollowingCount = followingNotifications.filter(n => !n.isRead).length;
 
     const handleMarkAllAsRead = () => {
-        const notificationIdsToMark = filteredNotifications.map(n => n.id);
+        const notificationIdsToMark = filteredNotifications.filter(n => !n.isRead).map(n => n.id);
         setNotifications((prev: Notification[]) => prev.map(n => notificationIdsToMark.includes(n.id) ? { ...n, isRead: true } : n));
     };
 
@@ -201,25 +201,27 @@ export default function NotificationsPage() {
     return (
         <div className="flex h-full flex-col">
             <AppHeader title="Notifications" />
-            <div className="border-b px-4 py-2 flex items-center justify-between">
-                <Tabs value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
-                    <TabsList>
-                        <TabsTrigger value="all" className="flex items-center gap-2">
-                            All
-                        </TabsTrigger>
-                        <TabsTrigger value="direct" className="flex items-center gap-2">
-                            Direct
-                            {unreadDirectCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadDirectCount}</Badge>}
-                        </TabsTrigger>
-                        <TabsTrigger value="following" className="flex items-center gap-2">
-                            Following
-                            {unreadFollowingCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadFollowingCount}</Badge>}
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
-                {unreadCount > 0 && (
-                    <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">Mark all as read</Button>
-                )}
+            <div className="border-b px-4 py-2">
+                <div className="flex items-center justify-between">
+                    <Tabs value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
+                        <TabsList>
+                            <TabsTrigger value="all" className="flex items-center gap-2">
+                                All
+                            </TabsTrigger>
+                            <TabsTrigger value="direct" className="flex items-center gap-2">
+                                Direct
+                                {unreadDirectCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadDirectCount}</Badge>}
+                            </TabsTrigger>
+                            <TabsTrigger value="following" className="flex items-center gap-2">
+                                Following
+                                {unreadFollowingCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadFollowingCount}</Badge>}
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                    {unreadCount > 0 && (
+                        <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">Mark all as read</Button>
+                    )}
+                </div>
             </div>
             <div className="flex-1 overflow-y-auto">
                 <Card className="max-w-3xl mx-auto my-4 md:my-6">
@@ -237,9 +239,9 @@ export default function NotificationsPage() {
                                         <NotificationItem
                                             key={notification.id}
                                             notification={notification}
-                                            onNotificationClick={(taskId) => {
+                                            onNotificationClick={(task) => {
                                                 handleMarkAsRead(notification.id);
-                                                handleOpenTaskFromNotification(taskId);
+                                                openTask(task);
                                             }}
                                             onMarkAsRead={handleMarkAsRead}
                                         />

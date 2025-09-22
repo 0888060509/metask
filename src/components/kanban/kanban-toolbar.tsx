@@ -66,8 +66,8 @@ export function KanbanToolbar({ filters, setFilters, searchQuery, setSearchQuery
         </div>
         
        <div className="flex items-center gap-2">
-        <ListFilter className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Filters:</span>
+        {showProjectFilter && <ListFilter className="h-4 w-4 text-muted-foreground" />}
+        {showProjectFilter && <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Filters:</span>}
 
         {showProjectFilter && (
             <DropdownMenu>
@@ -98,7 +98,7 @@ export function KanbanToolbar({ filters, setFilters, searchQuery, setSearchQuery
                 Assignee {filters.assignees.length > 0 && `(${filters.assignees.length})`}
             </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="end">
             <DropdownMenuLabel>Filter by Assignee</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {users.map((user) => (
@@ -119,7 +119,7 @@ export function KanbanToolbar({ filters, setFilters, searchQuery, setSearchQuery
                 Priority {filters.priorities.length > 0 && `(${filters.priorities.length})`}
             </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filter by Priority</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {priorities.map(priority => (

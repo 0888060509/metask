@@ -3,13 +3,12 @@
 "use client";
 
 import * as React from "react";
-import { notFound, usePathname } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from 'next/link';
 
 import { AppHeader } from "@/components/app-header";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
-import { TaskDetailDialog } from "@/components/kanban/task-detail-dialog";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
 import {
   AlertDialog,
@@ -22,8 +21,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { tasks as initialTasks, projects as allProjects, tags as initialTags } from "@/lib/data";
-import type { Task, TaskPriority, Project, Comment, Tag } from "@/lib/types";
+import { projects as allProjects } from "@/lib/data";
+import type { Task, TaskPriority, Project } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardContext } from "../../../layout";
 
@@ -34,36 +33,30 @@ export type Filters = {
 };
 
 function ProjectTabs({ projectId }: { projectId: string }) {
-    const pathname = usePathname();
-    const isDashboard = !pathname.endsWith('/tasks');
-
     return (
-        <Tabs value={isDashboard ? 'dashboard' : 'tasks'}>
-            <TabsList>
-                <TabsTrigger value="dashboard" asChild>
-                    <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
-                </TabsTrigger>
-                <TabsTrigger value="tasks" asChild>
-                    <Link href={`/dashboard/projects/${projectId}/tasks`}>Tasks</Link>
-                </TabsTrigger>
-            </TabsList>
-        </Tabs>
+        <TabsList>
+            <TabsTrigger value="dashboard" asChild>
+                <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
+            </TabsTrigger>
+            <TabsTrigger value="tasks" asChild>
+                <Link href={`/dashboard/projects/${projectId}/tasks`}>Tasks</Link>
+            </TabsTrigger>
+        </TabsList>
     );
 }
 
 function ProjectTasksClient({ params }: { params: { id: string } }) {
   const project = allProjects.find(p => p.id === params.id);
+  const context = React.useContext(DashboardContext);
     
   if (!project) {
       notFound();
   }
-
-  const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
-  const [projects, setProjects] = React.useState<Project[]>(allProjects);
-  const [tags, setTags] = React.useState<Tag[]>(initialTags);
+  
+  if (!context) return null;
+  const { tasks, setTasks, openTask, tags, projects } = context;
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
-  const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const [filters, setFilters] = React.useState<Omit<Filters, 'projects'>>({
@@ -72,8 +65,7 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
     tags: [],
   });
   
-  const currentUserId = "user-1"; // Changed for testing mentions
-  const dashboardContext = React.useContext(DashboardContext);
+  const currentUserId = "user-1"; 
 
   // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
@@ -89,72 +81,6 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
     setTasks((prevTasks) => [...prevTasks, taskWithId]);
   };
   
-  const handleUpdateTask = (updatedTask: Task) => {
-    setTasks((prevTasks) => prevTasks.map(task => task.id === updatedTask.id ? updatedTask : task));
-    setSelectedTask(updatedTask);
-  }
-
-  const handleDeleteTask = (taskId: string) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
-    setSelectedTask(null);
-  }
-
-  const handleOpenTask = (task: Task) => {
-    setSelectedTask(task);
-  };
-  
-  const handleCloseDetailDialog = () => {
-    setSelectedTask(null);
-  };
-
-  const handleAddComment = (taskId: string, commentText: string, parentId?: string | null) => {
-    const newComment: Comment = {
-      id: `comment-${Date.now()}`,
-      taskId,
-      userId: currentUserId,
-      text: commentText,
-      createdAt: new Date(),
-      parentId,
-      reactions: []
-    };
-
-    setTasks(prevTasks => {
-      const newTasks = prevTasks.map(task => {
-        if (task.id === taskId) {
-          const updatedTask = {
-            ...task,
-            comments: [...(task.comments || []), newComment]
-          };
-          if(selectedTask?.id === taskId) {
-            setSelectedTask(updatedTask);
-          }
-          return updatedTask;
-        }
-        return task;
-      });
-      return newTasks;
-    });
-
-    // Handle mentions
-    const mentions = commentText.match(/@(\w+\s\w+)/g) || [];
-    if (mentions.length > 0 && dashboardContext) {
-      const { addNotification, users } = dashboardContext;
-      mentions.forEach(mention => {
-        const userName = mention.substring(1);
-        const mentionedUser = users.find(u => u.name === userName);
-        if (mentionedUser && mentionedUser.id !== currentUserId) {
-          addNotification({
-            userId: mentionedUser.id,
-            actorId: currentUserId,
-            type: 'mention',
-            taskId: taskId,
-            details: { commentId: newComment.id }
-          });
-        }
-      });
-    }
-  };
-
   const filteredTasks = React.useMemo(() => {
     return tasks.filter((task) => {
       if (task.projectId !== params.id) return false;
@@ -182,7 +108,9 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
         title={project.name}
       />
       <div className="border-b px-4 py-2">
-        <ProjectTabs projectId={project.id} />
+        <Tabs value={'tasks'}>
+          <ProjectTabs projectId={project.id} />
+        </Tabs>
       </div>
       <KanbanToolbar
         searchQuery={searchQuery}
@@ -199,7 +127,7 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
         <KanbanBoard 
           tasks={filteredTasks} 
           setTasks={setTasks} 
-          onTaskClick={handleOpenTask}
+          onTaskClick={openTask}
           projects={projects}
           onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
         />
@@ -211,19 +139,6 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
         projects={projects}
         tags={tags}
         defaultProjectId={project.id}
-      />
-     <TaskDetailDialog 
-        task={selectedTask}
-        projects={projects}
-        tags={tags}
-        onOpenChange={(isOpen) => {
-            if (!isOpen) {
-                handleCloseDetailDialog();
-            }
-        }}
-        onUpdate={handleUpdateTask}
-        onDelete={handleDeleteTask}
-        onComment={handleAddComment}
       />
     </div>
   );
