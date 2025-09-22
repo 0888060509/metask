@@ -1,7 +1,7 @@
 "use client";
 
-import { projects, users } from "@/lib/data";
-import type { Task, TaskPriority } from "@/lib/types";
+import { users } from "@/lib/data";
+import type { Task, TaskPriority, Project } from "@/lib/types";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
@@ -30,9 +30,10 @@ type TaskDialogProps = {
   onOpenChange: (open: boolean) => void;
   task?: Task;
   onSave: (task: Omit<Task, "id" | "status">) => void;
+  projects: Project[];
 };
 
-export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps) {
+export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskDialogProps) {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [assigneeId, setAssigneeId] = React.useState<string | undefined>();
@@ -69,7 +70,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
   }, [open, task]);
   
   const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
-  const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), []);
+  const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

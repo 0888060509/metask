@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { projects, users } from "@/lib/data";
-import type { Task } from "@/lib/types";
+import { users } from "@/lib/data";
+import type { Task, Project } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,18 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { Calendar, Edit, Flag, MoreHorizontal, Trash2 } from "lucide-react";
+import { Calendar, Flag } from "lucide-react";
 
 type TaskCardProps = {
   task: Task;
+  project?: Project;
   onTaskClick: (task: Task) => void;
 };
 
@@ -33,9 +28,8 @@ const priorityClasses: Record<Task["priority"], string> = {
   high: "border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400",
 };
 
-export function TaskCard({ task, onTaskClick }: TaskCardProps) {
+export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
   const assignee = users.find((user) => user.id === task.assigneeId);
-  const project = projects.find((p) => p.id === task.projectId);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData("text/plain", task.id);
@@ -48,32 +42,11 @@ export function TaskCard({ task, onTaskClick }: TaskCardProps) {
       onClick={() => onTaskClick(task)}
       className="cursor-pointer active:cursor-grabbing hover:shadow-md transition-shadow"
     >
-      <CardHeader className="flex-row items-start justify-between gap-4">
-        <div className="space-y-1">
-          <CardTitle className="text-base">{task.title}</CardTitle>
-          {task.description && (
-            <CardDescription>{task.description}</CardDescription>
-          )}
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            onClick={(e) => e.stopPropagation()}
-            className="-mt-1.5 -mr-2.5 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          >
-            <MoreHorizontal className="h-5 w-5" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-              <Edit className="mr-2 h-4 w-4" /> Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={(e) => e.stopPropagation()}
-              className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/40"
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <CardHeader>
+        <CardTitle className="text-base">{task.title}</CardTitle>
+        {task.description && (
+          <CardDescription>{task.description}</CardDescription>
+        )}
       </CardHeader>
       <CardContent className="flex flex-wrap items-center gap-2">
         {project && (

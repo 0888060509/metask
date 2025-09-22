@@ -8,20 +8,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { projects, users } from "@/lib/data";
+import { users } from "@/lib/data";
 import { Filter, X } from "lucide-react";
 import type { Filters } from '@/app/page';
-import type { TaskPriority } from '@/lib/types';
+import type { TaskPriority, Project } from '@/lib/types';
 import { Badge } from '../ui/badge';
 
 type TaskFiltersProps = {
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
+  projects: Project[];
 };
 
 const priorities: TaskPriority[] = ["high", "medium", "low"];
 
-export function TaskFilters({ filters, setFilters }: TaskFiltersProps) {
+export function TaskFilters({ filters, setFilters, projects }: TaskFiltersProps) {
   const handleProjectCheckedChange = (projectId: string) => {
     setFilters((prev) => ({
       ...prev,

@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import type { Task, TaskStatus } from "@/lib/types";
+import type { Task, TaskStatus, Project } from "@/lib/types";
 import { KanbanColumn } from "./kanban-column";
 
 type KanbanBoardProps = {
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   onTaskClick: (task: Task) => void;
+  projects: Project[];
 };
 
 const columns: { id: TaskStatus; title: string }[] = [
@@ -16,7 +17,7 @@ const columns: { id: TaskStatus; title: string }[] = [
   { id: "done", title: "Done" },
 ];
 
-export function KanbanBoard({ tasks, setTasks, onTaskClick }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, setTasks, onTaskClick, projects }: KanbanBoardProps) {
   const onTaskDrop = (taskId: string, newStatus: TaskStatus) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
@@ -35,6 +36,7 @@ export function KanbanBoard({ tasks, setTasks, onTaskClick }: KanbanBoardProps) 
           tasks={tasks.filter((task) => task.status === column.id)}
           onTaskDrop={onTaskDrop}
           onTaskClick={onTaskClick}
+          projects={projects}
         />
       ))}
     </div>

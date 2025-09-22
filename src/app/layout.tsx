@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
@@ -30,7 +29,6 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <SidebarProvider>
-          <AppSidebar />
           <SidebarInset>
             {children}
           </SidebarInset>

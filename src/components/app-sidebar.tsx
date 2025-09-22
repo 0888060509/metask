@@ -1,6 +1,5 @@
 "use client";
 
-import { projects, users } from "@/lib/data";
 import {
   Bell,
   Home,
@@ -8,6 +7,10 @@ import {
   ChevronDown,
   ChevronRight,
   LayoutGrid,
+  Plus,
+  MoreHorizontal,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -23,12 +26,20 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "./ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
+import type { Project } from "@/lib/types";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
-export function AppSidebar() {
+type AppSidebarProps = {
+    projects: Project[];
+    onNewProjectClick: () => void;
+    onEditProject: (project: Project) => void;
+    onDeleteProject: (project: Project) => void;
+}
+
+export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDeleteProject }: AppSidebarProps) {
   const [isProjectsOpen, setIsProjectsOpen] = React.useState(true);
   const pathname = usePathname();
 
@@ -64,12 +75,18 @@ export function AppSidebar() {
           <Collapsible open={isProjectsOpen} onOpenChange={setIsProjectsOpen}>
             <div className="flex items-center justify-between">
               <SidebarGroupLabel>Projects</SidebarGroupLabel>
-              <CollapsibleTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-6 w-6">
-                    {isProjectsOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                    <span className="sr-only">Toggle Projects</span>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onNewProjectClick}>
+                    <Plus className="h-4 w-4 text-muted-foreground" />
+                    <span className="sr-only">Create Project</span>
                  </Button>
-              </CollapsibleTrigger>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                      {isProjectsOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                      <span className="sr-only">Toggle Projects</span>
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
             </div>
             <CollapsibleContent>
               <SidebarMenu>
@@ -84,11 +101,28 @@ export function AppSidebar() {
                 {projects.map((project) => (
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton asChild>
-                      <Link href="#">
+                      <Link href="#" className="flex-1">
                         <project.icon />
                         {project.name}
                       </Link>
                     </SidebarMenuButton>
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/menu-item:opacity-100">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onEditProject(project)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            <span>Edit</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onDeleteProject(project)} className="text-red-600 focus:text-red-600">
+                             <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>

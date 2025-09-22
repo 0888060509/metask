@@ -1,6 +1,6 @@
 "use client";
 
-import type { Task, TaskStatus } from "@/lib/types";
+import type { Task, TaskStatus, Project } from "@/lib/types";
 import { TaskCard } from "./task-card";
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -11,9 +11,10 @@ type KanbanColumnProps = {
   tasks: Task[];
   onTaskDrop: (taskId: string, newStatus: TaskStatus) => void;
   onTaskClick: (task: Task) => void;
+  projects: Project[];
 };
 
-export function KanbanColumn({ title, status, tasks, onTaskDrop, onTaskClick }: KanbanColumnProps) {
+export function KanbanColumn({ title, status, tasks, onTaskDrop, onTaskClick, projects }: KanbanColumnProps) {
   const [isOver, setIsOver] = React.useState(false);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -51,7 +52,12 @@ export function KanbanColumn({ title, status, tasks, onTaskDrop, onTaskClick }: 
       </div>
       <div className="flex flex-1 flex-col gap-4 p-4">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} onTaskClick={onTaskClick} />
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            onTaskClick={onTaskClick}
+            project={projects.find((p) => p.id === task.projectId)} 
+          />
         ))}
         {tasks.length === 0 && (
             <div className="flex h-32 items-center justify-center rounded-lg bg-muted/50">

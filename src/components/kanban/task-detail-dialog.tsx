@@ -1,19 +1,25 @@
 "use client";
 
 import React from "react";
-import { projects, users } from "@/lib/data";
-import type { Task, TaskPriority } from "@/lib/types";
+import { users } from "@/lib/data";
+import type { Task, TaskPriority, Project } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
@@ -22,15 +28,18 @@ import {
   User,
   Folder,
   Tag,
-  AlignLeft,
   CheckCircle,
   Edit,
+  MoreVertical,
+  Trash2,
 } from "lucide-react";
 
 type TaskDetailDialogProps = {
   task: Task | null;
+  projects: Project[];
   onOpenChange: (open: boolean) => void;
   onEdit: () => void;
+  onDelete: (taskId: string) => void;
 };
 
 const priorityClasses: Record<TaskPriority, string> = {
@@ -67,8 +76,10 @@ function DetailRow({
 
 export function TaskDetailDialog({
   task,
+  projects,
   onOpenChange,
   onEdit,
+  onDelete,
 }: TaskDetailDialogProps) {
   if (!task) return null;
 
@@ -79,13 +90,18 @@ export function TaskDetailDialog({
     onOpenChange(false);
     onEdit();
   };
+  
+  const handleDelete = () => {
+    onOpenChange(false);
+    onDelete(task.id);
+  }
 
   return (
     <Dialog open={!!task} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-headline text-2xl">{task.title}</DialogTitle>
-          <DialogDescription>{task.description}</DialogDescription>
+          <DialogTitle className="font-headline text-2xl pr-10">{task.title}</DialogTitle>
+          {task.description && <p className="text-muted-foreground">{task.description}</p>}
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <DetailRow icon={CheckCircle} label="Status">
@@ -144,9 +160,23 @@ export function TaskDetailDialog({
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={handleEdit}>
-            <Edit className="mr-2 h-4 w-4" /> Edit
-          </Button>
+           <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="absolute top-4 right-12">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleEdit}>
+                <Edit className="mr-2 h-4 w-4" />
+                <span>Edit</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </DialogFooter>
       </DialogContent>
     </Dialog>

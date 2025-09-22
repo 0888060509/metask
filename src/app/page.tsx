@@ -6,8 +6,20 @@ import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { TaskDetailDialog } from "@/components/kanban/task-detail-dialog";
 import { TaskFilters } from "@/components/kanban/task-filters";
-import { tasks as initialTasks } from "@/lib/data";
-import type { Task, TaskPriority } from "@/lib/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ProjectDialog } from "@/components/project/project-dialog";
+import { tasks as initialTasks, projects as initialProjects } from "@/lib/data";
+import type { Task, TaskPriority, Project } from "@/lib/types";
+import { FileText } from "lucide-react";
 
 export type Filters = {
   projects: string[];
@@ -17,9 +29,17 @@ export type Filters = {
 
 export default function Home() {
   const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
+  const [projects, setProjects] = React.useState<Project[]>(initialProjects);
+
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
   const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = React.useState(false);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = React.useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+
   const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
+  const [selectedProject, setSelectedProject] = React.useState<Project | null>(null);
+  const [projectToDelete, setProjectToDelete] = React.useState<Project | null>(null);
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const [filters, setFilters] = React.useState<Filters>({
     projects: [],
@@ -27,6 +47,7 @@ export default function Home() {
     priorities: [],
   });
 
+  // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status">) => {
     const taskWithId: Task = {
       ...newTask,
@@ -41,6 +62,11 @@ export default function Home() {
     setSelectedTask(updatedTask);
   }
 
+  const handleDeleteTask = (taskId: string) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
+    setSelectedTask(null);
+  }
+
   const handleOpenTask = (task: Task) => {
     setSelectedTask(task);
   };
@@ -52,6 +78,48 @@ export default function Home() {
   const handleOpenEditDialog = () => {
     setIsEditTaskDialogOpen(true);
   }
+
+  // Project handlers
+  const handleCreateProject = () => {
+    setSelectedProject(null);
+    setIsProjectDialogOpen(true);
+  };
+
+  const handleEditProject = (project: Project) => {
+    setSelectedProject(project);
+    setIsProjectDialogOpen(true);
+  };
+  
+  const handleSaveProject = (projectData: { name: string }) => {
+    if (selectedProject) {
+      // Update existing project
+      setProjects(projects.map(p => p.id === selectedProject.id ? { ...p, ...projectData } : p));
+    } else {
+      // Create new project
+      const newProject: Project = {
+        id: `proj-${Date.now()}`,
+        name: projectData.name,
+        icon: FileText,
+      };
+      setProjects([...projects, newProject]);
+    }
+  };
+  
+  const confirmDeleteProject = (project: Project) => {
+    setProjectToDelete(project);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteProject = () => {
+    if (projectToDelete) {
+      setProjects(projects.filter(p => p.id !== projectToDelete.id));
+      // Also delete tasks associated with the project
+      setTasks(tasks.filter(t => t.projectId !== projectToDelete.id));
+      setProjectToDelete(null);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
 
   const filteredTasks = React.useMemo(() => {
     return tasks.filter((task) => {
@@ -78,27 +146,60 @@ export default function Home() {
         onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        projects={projects}
+        onNewProjectClick={handleCreateProject}
+        onEditProject={handleEditProject}
+        onDeleteProject={confirmDeleteProject}
       />
-      <TaskFilters filters={filters} setFilters={setFilters} />
+      <TaskFilters filters={filters} setFilters={setFilters} projects={projects} />
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <KanbanBoard tasks={filteredTasks} setTasks={setTasks} onTaskClick={handleOpenTask} />
+        <KanbanBoard 
+          tasks={filteredTasks} 
+          setTasks={setTasks} 
+          onTaskClick={handleOpenTask}
+          projects={projects}
+        />
       </div>
       <TaskDialog
         open={isNewTaskDialogOpen}
         onOpenChange={setIsNewTaskDialogOpen}
         onSave={handleCreateTask}
+        projects={projects}
       />
       <TaskDialog
         open={isEditTaskDialogOpen}
         onOpenChange={setIsEditTaskDialogOpen}
         onSave={(updatedTask) => handleUpdateTask({...selectedTask, ...updatedTask} as Task)}
         task={selectedTask ?? undefined}
+        projects={projects}
       />
        <TaskDetailDialog 
-        task={selectedTask} 
+        task={selectedTask}
+        projects={projects}
         onOpenChange={handleCloseDetailDialog}
         onEdit={handleOpenEditDialog}
+        onDelete={handleDeleteTask}
       />
+      <ProjectDialog 
+        open={isProjectDialogOpen}
+        onOpenChange={setIsProjectDialogOpen}
+        onSave={handleSaveProject}
+        project={selectedProject}
+      />
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the "{projectToDelete?.name}" project and all its tasks. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
