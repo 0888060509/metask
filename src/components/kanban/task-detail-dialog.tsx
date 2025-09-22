@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -137,84 +138,89 @@ export function TaskDetailDialog({
         </SheetHeader>
         
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6 pt-0">
-            {/* Left Column: Details */}
+            {/* Left Column: Tabs for Details and Activity */}
             <div className="md:col-span-2 space-y-6">
-                 <div className="space-y-4 rounded-lg border p-4">
-                     <h3 className="font-semibold text-lg">Details</h3>
-                    <DetailRow icon={CheckCircle} label="Status">
-                        <Badge className={cn("text-white", statusClasses[task.status])}>
-                        {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-                        </Badge>
-                    </DetailRow>
+              <Tabs defaultValue="details">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                </TabsList>
+                <TabsContent value="details">
+                  <div className="space-y-4 rounded-lg border p-4 mt-4">
+                      <DetailRow icon={CheckCircle} label="Status">
+                          <Badge className={cn("text-white", statusClasses[task.status])}>
+                          {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                          </Badge>
+                      </DetailRow>
 
-                    <DetailRow icon={Flag} label="Priority">
-                        <span
-                        className={cn("font-medium", priorityClasses[task.priority])}
-                        >
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                        </span>
-                    </DetailRow>
+                      <DetailRow icon={Flag} label="Priority">
+                          <span
+                          className={cn("font-medium", priorityClasses[task.priority])}
+                          >
+                          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                          </span>
+                      </DetailRow>
 
-                    {assignee && (
-                        <DetailRow icon={User} label="Assignee">
-                        <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                            <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
-                            <AvatarFallback>
-                                {assignee.name.charAt(0)}
-                            </AvatarFallback>
-                            </Avatar>
-                            <span>{assignee.name}</span>
-                        </div>
-                        </DetailRow>
-                    )}
+                      {assignee && (
+                          <DetailRow icon={User} label="Assignee">
+                          <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                              <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
+                              <AvatarFallback>
+                                  {assignee.name.charAt(0)}
+                              </AvatarFallback>
+                              </Avatar>
+                              <span>{assignee.name}</span>
+                          </div>
+                          </DetailRow>
+                      )}
 
-                    {project && (
-                        <DetailRow icon={Folder} label="Project">
-                        <div className="flex items-center gap-2">
-                            <ProjectIcon className="h-4 w-4 text-muted-foreground" />
-                            <span>{project.name}</span>
-                        </div>
-                        </DetailRow>
-                    )}
+                      {project && (
+                          <DetailRow icon={Folder} label="Project">
+                          <div className="flex items-center gap-2">
+                              <ProjectIcon className="h-4 w-4 text-muted-foreground" />
+                              <span>{project.name}</span>
+                          </div>
+                          </DetailRow>
+                      )}
 
-                    {task.deadline && (
-                        <DetailRow icon={Calendar} label="Deadline">
-                        {format(task.deadline, "PPP")}
-                        </DetailRow>
-                    )}
+                      {task.deadline && (
+                          <DetailRow icon={Calendar} label="Deadline">
+                          {format(task.deadline, "PPP")}
+                          </DetailRow>
+                      )}
 
-                    {task.tags && task.tags.length > 0 && (
-                        <DetailRow icon={Tag} label="Tags">
-                        <div className="flex flex-wrap gap-2">
-                            {task.tags.map((tag) => (
-                            <Badge key={tag} variant="secondary">
-                                {tag}
-                            </Badge>
-                            ))}
-                        </div>
-                        </DetailRow>
-                    )}
-                 </div>
+                      {task.tags && task.tags.length > 0 && (
+                          <DetailRow icon={Tag} label="Tags">
+                          <div className="flex flex-wrap gap-2">
+                              {task.tags.map((tag) => (
+                              <Badge key={tag} variant="secondary">
+                                  {tag}
+                              </Badge>
+                              ))}
+                          </div>
+                          </DetailRow>
+                      )}
+                  </div>
+                </TabsContent>
+                <TabsContent value="activity">
+                  <div className="space-y-4 mt-4">
+                      <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
+                          <Clock className="h-10 w-10 text-muted-foreground/30" />
+                          <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
+                      </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
 
-            {/* Right Column: Comments & Activity */}
+            {/* Right Column: Comments */}
             <div className="md:col-span-1 space-y-6">
                 <div className="space-y-4">
                      <h3 className="font-semibold text-lg flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" /> Comments</h3>
                      <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
                         <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
                         <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
-                    </div>
-                </div>
-
-                 <Separator />
-
-                 <div className="space-y-4">
-                     <h3 className="font-semibold text-lg flex items-center gap-2"><Clock className="w-5 h-5 text-muted-foreground" /> Activity</h3>
-                    <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
-                        <Clock className="h-10 w-10 text-muted-foreground/30" />
-                        <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
                     </div>
                 </div>
             </div>
