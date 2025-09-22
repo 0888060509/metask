@@ -4,6 +4,7 @@ import { projects, users } from "@/lib/data";
 import type { Task, TaskPriority } from "@/lib/types";
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
@@ -66,6 +67,9 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
         setDeadline(task?.deadline);
     }
   }, [open, task]);
+  
+  const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
+  const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -98,35 +102,29 @@ export function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps
             <Label htmlFor="assignee" className="text-right">
               Assignee
             </Label>
-            <Select value={assigneeId} onValueChange={setAssigneeId}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select an assignee" />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              className="col-span-3"
+              options={userOptions}
+              value={assigneeId}
+              onValueChange={setAssigneeId}
+              placeholder="Select an assignee"
+              searchPlaceholder="Search assignees..."
+              emptyResult="No assignees found."
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="project" className="text-right">
               Project
             </Label>
-            <Select value={projectId} onValueChange={setProjectId}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a project" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+             <Combobox
+                className="col-span-3"
+                options={projectOptions}
+                value={projectId}
+                onValueChange={setProjectId}
+                placeholder="Select a project"
+                searchPlaceholder="Search projects..."
+                emptyResult="No projects found."
+            />
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="priority" className="text-right">
