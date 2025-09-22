@@ -118,8 +118,8 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
                   return (
                   <SidebarMenuItem key={project.id}>
                     <div className="flex items-center w-full">
-                        <SidebarMenuButton asChild isActive={pathname === `/dashboard/projects/${project.id}`} className="flex-1">
-                            <Link href={`/dashboard/projects/${project.id}`}>
+                        <SidebarMenuButton asChild isActive={pathname.includes(`/dashboard/projects/${project.id}`)} className="flex-1">
+                            <Link href={`/dashboard/projects/${project.id}/tasks`}>
                                 <Icon />
                                 {project.name}
                             </Link>

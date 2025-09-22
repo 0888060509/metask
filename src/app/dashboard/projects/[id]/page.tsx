@@ -6,12 +6,14 @@ import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tasks as allTasks, projects as allProjects, users } from "@/lib/data";
 import { Task } from "@/lib/types";
-import { notFound } from 'next/navigation';
+import { notFound, usePathname } from 'next/navigation';
 import { differenceInBusinessDays, formatDistanceToNow, isAfter, isBefore } from "date-fns";
 import { BurndownChart } from "@/components/project/burndown-chart";
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { buttonVariants } from "@/components/ui/button";
 
 function TaskAgeingCard({ tasks }: { tasks: Task[] }) {
     const inProgressTasks = tasks
@@ -107,6 +109,26 @@ function DeadlineHealthCard({ tasks }: { tasks: Task[] }) {
     );
 }
 
+function ProjectTabs({ projectId }: { projectId: string }) {
+    const pathname = usePathname();
+    const isDashboard = !pathname.endsWith('/tasks');
+
+    return (
+        <div className="px-4 md:px-6">
+            <Tabs value={isDashboard ? 'dashboard' : 'tasks'} className="w-full">
+                <TabsList>
+                    <TabsTrigger value="dashboard" asChild>
+                        <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
+                    </TabsTrigger>
+                    <TabsTrigger value="tasks" asChild>
+                        <Link href={`/dashboard/projects/${projectId}/tasks`}>Tasks</Link>
+                    </TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </div>
+    );
+}
+
 export default function ProjectDashboardPage({ params }: { params: { id: string } }) {
     const project = allProjects.find(p => p.id === params.id);
     const projectTasks = allTasks.filter(t => t.projectId === params.id);
@@ -124,6 +146,7 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
     return (
         <div className="flex h-full flex-col">
             <AppHeader title={project.name} />
+            <ProjectTabs projectId={project.id} />
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                      <Card>
@@ -167,3 +190,4 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
         </div>
     );
 }
+

@@ -14,22 +14,30 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { users } from "@/lib/data";
 import { ListFilter, Search, X } from "lucide-react";
-import type { Filters } from '@/app/page';
 import type { TaskPriority, Project } from '@/lib/types';
 
 type KanbanToolbarProps = {
-  filters: Filters;
-  setFilters: React.Dispatch<React.SetStateAction<Filters>>;
+  filters: {
+    projects: string[];
+    assignees: string[];
+    priorities: TaskPriority[];
+  };
+  setFilters: React.Dispatch<React.SetStateAction<{
+    projects: string[];
+    assignees: string[];
+    priorities: TaskPriority[];
+  }>>;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   projects: Project[];
+  showProjectFilter?: boolean;
 };
 
 const priorities: TaskPriority[] = ["high", "medium", "low"];
 
-export function KanbanToolbar({ filters, setFilters, searchQuery, setSearchQuery, projects }: KanbanToolbarProps) {
+export function KanbanToolbar({ filters, setFilters, searchQuery, setSearchQuery, projects, showProjectFilter = true }: KanbanToolbarProps) {
 
-  const handleFilterChange = (category: keyof Filters, value: string) => {
+  const handleFilterChange = (category: keyof typeof filters, value: string) => {
     setFilters(prev => {
       const currentCategory = prev[category] as string[];
       const newValue = currentCategory.includes(value)
@@ -43,7 +51,7 @@ export function KanbanToolbar({ filters, setFilters, searchQuery, setSearchQuery
     setFilters({ projects: [], assignees: [], priorities: [] });
   };
   
-  const hasActiveFilters = filters.projects.length > 0 || filters.assignees.length > 0 || filters.priorities.length > 0;
+  const hasActiveFilters = (showProjectFilter && filters.projects.length > 0) || filters.assignees.length > 0 || filters.priorities.length > 0;
 
   return (
     <div className="flex items-center justify-between gap-4 border-b bg-background/95 px-4 py-3 backdrop-blur-sm sm:px-6">
@@ -61,26 +69,28 @@ export function KanbanToolbar({ filters, setFilters, searchQuery, setSearchQuery
         <ListFilter className="h-4 w-4 text-muted-foreground" />
         <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Filters:</span>
 
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className={filters.projects.length > 0 ? "border-primary text-primary hover:text-primary" : ""}>
-                Project {filters.projects.length > 0 && `(${filters.projects.length})`}
-            </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-            <DropdownMenuLabel>Filter by Project</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {projects.map((project) => (
-                <DropdownMenuCheckboxItem
-                key={project.id}
-                checked={filters.projects.includes(project.id)}
-                onCheckedChange={() => handleFilterChange("projects", project.id)}
-                >
-                {project.name}
-                </DropdownMenuCheckboxItem>
-            ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
+        {showProjectFilter && (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className={filters.projects.length > 0 ? "border-primary text-primary hover:text-primary" : ""}>
+                    Project {filters.projects.length > 0 && `(${filters.projects.length})`}
+                </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Filter by Project</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {projects.map((project) => (
+                    <DropdownMenuCheckboxItem
+                    key={project.id}
+                    checked={filters.projects.includes(project.id)}
+                    onCheckedChange={() => handleFilterChange("projects", project.id)}
+                    >
+                    {project.name}
+                    </DropdownMenuCheckboxItem>
+                ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        )}
 
         <DropdownMenu>
             <DropdownMenuTrigger asChild>

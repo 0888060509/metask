@@ -34,9 +34,10 @@ type TaskDialogProps = {
   onSave: (task: Omit<Task, "id" | "status" | "comments" | "activity">) => void;
   projects: Project[];
   tags: Tag[];
+  defaultProjectId?: string;
 };
 
-export function TaskDialog({ open, onOpenChange, task, onSave, projects, tags }: TaskDialogProps) {
+export function TaskDialog({ open, onOpenChange, task, onSave, projects, tags, defaultProjectId }: TaskDialogProps) {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [projectId, setProjectId] = React.useState("");
@@ -67,13 +68,13 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects, tags }:
     if (open) {
         setTitle(task?.title || "");
         setDescription(task?.description || "");
-        setProjectId(task?.projectId || "");
+        setProjectId(task?.projectId || defaultProjectId || "");
         setAssigneeIds(task?.assigneeIds || []);
         setPriority(task?.priority || 'medium');
         setDeadline(task?.deadline ? new Date(task.deadline) : undefined);
         setTagIds(task?.tagIds || []);
     }
-  }, [open, task]);
+  }, [open, task, defaultProjectId]);
   
   const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
   const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
@@ -148,6 +149,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects, tags }:
                 placeholder="Select a project"
                 searchPlaceholder="Search projects..."
                 emptyResult="No projects found."
+                disabled={!!defaultProjectId}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -179,3 +181,4 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects, tags }:
     </Dialog>
   );
 }
+
