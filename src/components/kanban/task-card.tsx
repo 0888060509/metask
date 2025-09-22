@@ -52,7 +52,7 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
       className="cursor-pointer active:cursor-grabbing hover:shadow-md transition-shadow"
     >
       <CardHeader>
-        <CardTitle className="text-base">{task.title}</CardTitle>
+        <CardTitle className="text-base break-words">{task.title}</CardTitle>
         {task.description && (
           <CardDescription>{task.description}</CardDescription>
         )}
