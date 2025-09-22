@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from "react";
@@ -193,7 +194,7 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
         notFound();
     }
 
-    const projectTasks = allTasks.filter(t => t.projectId === project.id);
+    const projectTasks = allTasks.filter(t => t.projectId === params.id);
     
     return <ProjectDashboardClient project={project} projectTasks={projectTasks} />;
 }

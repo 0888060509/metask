@@ -144,6 +144,7 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
             actorId: currentUserId,
             type: 'mention',
             taskId: taskId,
+            details: { commentId: newComment.id }
           });
         }
       });
