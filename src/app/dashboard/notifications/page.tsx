@@ -80,6 +80,11 @@ function NotificationItem({ notification, onNotificationClick, onMarkAsRead }: N
   const actor = users.find((u) => u.id === notification.actorId);
   const task = tasks.find((t) => t.id === notification.taskId);
   const Icon = notificationIcons[notification.type];
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
      <div
@@ -131,7 +136,7 @@ function NotificationItem({ notification, onNotificationClick, onMarkAsRead }: N
         <div className="flex-1">
             <p className="text-sm text-foreground">{getNotificationText(notification, actor, task)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-                {formatDistanceToNowStrict(notification.timestamp, { addSuffix: true })}
+                {isClient && formatDistanceToNowStrict(notification.timestamp, { addSuffix: true })}
             </p>
             {getNotificationContext(notification, task)}
         </div>

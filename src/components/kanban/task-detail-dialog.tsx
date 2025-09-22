@@ -135,6 +135,11 @@ const CommentItem = ({
     const [replyText, setReplyText] = React.useState("");
     const [editText, setEditText] = React.useState(comment.text);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
+    const [isClient, setIsClient] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const handleReply = () => {
         onReply(comment.id, replyText);
@@ -160,7 +165,7 @@ const CommentItem = ({
             <div className="flex-1">
                 <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm">{commentUser?.name}</p>
-                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
+                    <p className="text-xs text-muted-foreground">{isClient && formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
                 </div>
                 {isEditing ? (
                      <div className="mt-2">
@@ -400,6 +405,11 @@ export function TaskDetailDialog({
   const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
   const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
   const tagOptions = React.useMemo(() => tags.map(tag => ({ value: tag.id, label: tag.name })), [tags]);
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   React.useEffect(() => {
     if (task) {
@@ -637,7 +647,7 @@ export function TaskDetailDialog({
                                         <div className="flex-1 text-sm">
                                         <p className="break-words">{activity.details}</p>
                                         <p className="text-xs text-muted-foreground mt-0.5">
-                                            {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                                            {isClient && formatDistanceToNow(activity.timestamp, { addSuffix: true })}
                                         </p>
                                         </div>
                                     </div>

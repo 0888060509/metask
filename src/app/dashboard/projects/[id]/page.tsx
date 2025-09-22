@@ -62,6 +62,11 @@ function DeadlineHealthCard({ tasks, onTaskClick }: { tasks: Task[], onTaskClick
 
     const overdueTasks = tasks.filter(t => t.deadline && t.status !== 'done' && isBefore(t.deadline, now));
     const upcomingTasks = tasks.filter(t => t.deadline && t.status !== 'done' && isAfter(t.deadline, now) && isBefore(t.deadline, fortyEightHoursFromNow));
+    const [isClient, setIsClient] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     return (
         <Card>
@@ -80,7 +85,7 @@ function DeadlineHealthCard({ tasks, onTaskClick }: { tasks: Task[], onTaskClick
                              <div key={task.id} className="flex justify-between items-center">
                                 <button onClick={() => onTaskClick(task)} className="hover:underline text-left truncate pr-4">{task.title}</button>
                                 <span className="text-red-500 font-medium">
-                                    {formatDistanceToNow(task.deadline!, { addSuffix: true })}
+                                    {isClient && formatDistanceToNow(task.deadline!, { addSuffix: true })}
                                 </span>
                             </div>
                         ))}
@@ -98,7 +103,7 @@ function DeadlineHealthCard({ tasks, onTaskClick }: { tasks: Task[], onTaskClick
                              <div key={task.id} className="flex justify-between items-center">
                                 <button onClick={() => onTaskClick(task)} className="hover:underline text-left truncate pr-4">{task.title}</button>
                                 <span className="text-yellow-500 font-medium">
-                                     {formatDistanceToNow(task.deadline!, { addSuffix: true })}
+                                     {isClient && formatDistanceToNow(task.deadline!, { addSuffix: true })}
                                 </span>
                             </div>
                         ))}
