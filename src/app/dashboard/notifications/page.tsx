@@ -9,7 +9,7 @@ import { tasks, users } from "@/lib/data";
 import { Notification, Task, User } from "@/lib/types";
 import { format, formatDistanceToNowStrict, isToday, isYesterday } from "date-fns";
 import { cn } from "@/lib/utils";
-import { MessageSquare, UserPlus, CheckCircle, AtSign } from "lucide-react";
+import { MessageSquare, UserPlus, CheckCircle, AtSign, FileClock } from "lucide-react";
 import { DashboardContext } from "../layout";
 
 type NotificationItemProps = {
@@ -22,6 +22,8 @@ const notificationIcons = {
   assignment: UserPlus,
   status_change: CheckCircle,
   mention: AtSign,
+  new_comment: MessageSquare,
+  due_reminder: FileClock,
 };
 
 const getNotificationText = (notification: Notification, actor?: User, task?: Task) => {
@@ -29,14 +31,19 @@ const getNotificationText = (notification: Notification, actor?: User, task?: Ta
     const taskTitle = <em className="font-normal">{task?.title || 'a task'}</em>;
 
     switch(notification.type) {
-        case 'comment':
-            return <>{actorName} commented on {taskTitle}.</>;
         case 'assignment':
-            return <>{actorName} assigned you to {taskTitle}.</>;
+            return <>You have just been assigned the task {taskTitle} by {actorName}.</>;
         case 'status_change':
-             return <>{actorName} updated the status of {taskTitle}.</>;
+             const newStatus = <strong className="font-medium">{notification.details?.newStatus || 'a new status'}</strong>;
+             return <>The task {taskTitle} you are following has been moved to {newStatus}.</>;
         case 'mention':
-            return <>{actorName} mentioned you in a comment on {taskTitle}.</>;
+            return <>{actorName} mentioned you in the task {taskTitle}.</>;
+        case 'new_comment':
+            return <>There is a new comment in the task {taskTitle} you are following.</>;
+        case 'due_reminder':
+            return <>The task {taskTitle} is due tomorrow.</>;
+        case 'comment': // Fallback for old comment type
+             return <>{actorName} commented on {taskTitle}.</>;
         default:
             return "You have a new notification.";
     }

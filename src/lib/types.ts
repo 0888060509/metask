@@ -61,8 +61,11 @@ export type Notification = {
   id: string;
   userId: string; // The user who should receive the notification
   actorId: string; // The user who performed the action
-  type: 'comment' | 'assignment' | 'status_change' | 'mention';
+  type: 'comment' | 'assignment' | 'status_change' | 'mention' | 'new_comment' | 'due_reminder';
   taskId: string;
   isRead: boolean;
   timestamp: Date;
+  details?: {
+    newStatus?: TaskStatus;
+  };
 };
