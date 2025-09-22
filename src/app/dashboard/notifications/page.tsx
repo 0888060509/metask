@@ -15,6 +15,7 @@ import { DashboardContext } from "../layout";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 
 type NotificationItemProps = {
@@ -157,18 +158,15 @@ export default function NotificationsPage() {
         .filter((n: Notification) => n.userId === currentUserId)
         .sort((a: Notification, b: Notification) => b.timestamp.getTime() - a.timestamp.getTime());
     
+    const directNotifications = userNotifications.filter(n => n.type === 'mention' || n.type === 'assignment' || n.type === 'due_reminder');
+    const followingNotifications = userNotifications.filter(n => n.type === 'new_comment' || n.type === 'status_change');
+
     const filteredNotifications = React.useMemo(() => {
-        if (filterType === 'all') {
-            return userNotifications;
-        }
-        if (filterType === 'direct') {
-            return userNotifications.filter(n => n.type === 'mention' || n.type === 'assignment' || n.type === 'due_reminder');
-        }
-        if (filterType === 'following') {
-            return userNotifications.filter(n => n.type === 'new_comment' || n.type === 'status_change');
-        }
+        if (filterType === 'all') return userNotifications;
+        if (filterType === 'direct') return directNotifications;
+        if (filterType === 'following') return followingNotifications;
         return [];
-    }, [userNotifications, filterType]);
+    }, [userNotifications, directNotifications, followingNotifications, filterType]);
 
     const groupedNotifications = filteredNotifications.reduce((acc: GroupedNotifications, notif: Notification) => {
         let key = 'Older';
@@ -187,6 +185,8 @@ export default function NotificationsPage() {
     const orderedGroups = ['Today', 'Yesterday', 'Older'].filter(group => groupedNotifications[group]);
     
     const unreadCount = userNotifications.filter(n => !n.isRead).length;
+    const unreadDirectCount = directNotifications.filter(n => !n.isRead).length;
+    const unreadFollowingCount = followingNotifications.filter(n => !n.isRead).length;
 
     const handleMarkAllAsRead = () => {
         setNotifications((prev: Notification[]) => prev.map(n => n.userId === currentUserId ? { ...n, isRead: true } : n));
@@ -199,24 +199,29 @@ export default function NotificationsPage() {
     return (
         <div className="flex h-full flex-col">
             <AppHeader title="Notifications">
-              {unreadCount > 0 && (
-                <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">Mark all as read</Button>
-              )}
+                 <div className="flex items-center gap-4">
+                    <Tabs value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
+                        <TabsList>
+                            <TabsTrigger value="all" className="flex items-center gap-2">
+                                All
+                            </TabsTrigger>
+                            <TabsTrigger value="direct" className="flex items-center gap-2">
+                                Direct
+                                {unreadDirectCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadDirectCount}</Badge>}
+                            </TabsTrigger>
+                            <TabsTrigger value="following" className="flex items-center gap-2">
+                                Following
+                                {unreadFollowingCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadFollowingCount}</Badge>}
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                    {unreadCount > 0 && (
+                        <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">Mark all as read</Button>
+                    )}
+                 </div>
             </AppHeader>
             <div className="flex-1 overflow-y-auto">
                 <Card className="max-w-3xl mx-auto my-4 md:my-6">
-                    <CardHeader>
-                        <CardTitle className="font-headline">Your Updates</CardTitle>
-                    </CardHeader>
-                    <div className="px-6 border-b">
-                         <Tabs value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
-                            <TabsList>
-                                <TabsTrigger value="all">All</TabsTrigger>
-                                <TabsTrigger value="direct">Direct</TabsTrigger>
-                                <TabsTrigger value="following">Following</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
-                    </div>
                     <CardContent className="p-0">
                         {filteredNotifications.length === 0 ? (
                              <div className="text-center p-12">
@@ -224,7 +229,7 @@ export default function NotificationsPage() {
                             </div>
                         ) : (
                            orderedGroups.map((group) => (
-                               <div key={group} className="border-t">
+                               <div key={group} className="border-t first:border-t-0">
                                    <h3 className="text-sm font-semibold text-muted-foreground px-6 py-3 bg-muted/50">{group}</h3>
                                    <div className="flex flex-col">
                                     {groupedNotifications[group].map((notification) => (
