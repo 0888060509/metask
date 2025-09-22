@@ -13,6 +13,8 @@ import {
   Edit,
   Trash2,
   Tag,
+  Users,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -151,6 +153,23 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
       </SidebarContent>
       <SidebarSeparator />
       <SidebarFooter>
+        <SidebarGroup>
+            <SidebarGroupLabel className="flex items-center gap-2">
+                <Shield />
+                Admin
+            </SidebarGroupLabel>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith('/dashboard/admin/users')}>
+                        <Link href="#">
+                            <Users />
+                            User Management
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </SidebarGroup>
+        <SidebarSeparator />
          <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/settings")}>
