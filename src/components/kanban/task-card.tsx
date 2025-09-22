@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { users } from "@/lib/data";
+import { projects, users } from "@/lib/data";
 import type { Task } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,8 @@ const priorityClasses: Record<Task["priority"], string> = {
 
 export function TaskCard({ task, onTaskClick }: TaskCardProps) {
   const assignee = users.find((user) => user.id === task.assigneeId);
+  const project = projects.find((p) => p.id === task.projectId);
+
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData("text/plain", task.id);
   };
@@ -73,7 +75,13 @@ export function TaskCard({ task, onTaskClick }: TaskCardProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
+      <CardContent className="flex flex-wrap items-center gap-2">
+        {project && (
+          <Badge variant="outline" className="text-xs font-medium">
+             <project.icon className="mr-1.5 h-3 w-3" />
+            {project.name}
+          </Badge>
+        )}
         <Badge
           variant="outline"
           className={cn("text-xs", priorityClasses[task.priority])}
