@@ -142,68 +142,68 @@ export default function Home() {
 
   return (
     <>
-    <AppSidebar 
+      <AppSidebar 
         projects={projects} 
         onNewProjectClick={handleCreateProject}
         onEditProject={handleEditProject}
         onDeleteProject={confirmDeleteProject}
       />
-    <div className="flex h-full flex-col">
-      <AppHeader 
-        onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-      />
-      <TaskFilters filters={filters} setFilters={setFilters} projects={projects} />
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <KanbanBoard 
-          tasks={filteredTasks} 
-          setTasks={setTasks} 
-          onTaskClick={handleOpenTask}
+      <div className="flex h-full flex-col">
+        <AppHeader 
+          onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+        <TaskFilters filters={filters} setFilters={setFilters} projects={projects} />
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <KanbanBoard 
+            tasks={filteredTasks} 
+            setTasks={setTasks} 
+            onTaskClick={handleOpenTask}
+            projects={projects}
+          />
+        </div>
+        <TaskDialog
+          open={isNewTaskDialogOpen}
+          onOpenChange={setIsNewTaskDialogOpen}
+          onSave={handleCreateTask}
           projects={projects}
         />
-      </div>
-      <TaskDialog
-        open={isNewTaskDialogOpen}
-        onOpenChange={setIsNewTaskDialogOpen}
-        onSave={handleCreateTask}
-        projects={projects}
-      />
-      <TaskDialog
-        open={isEditTaskDialogOpen}
-        onOpenChange={setIsEditTaskDialogOpen}
-        onSave={(updatedTask) => handleUpdateTask({...selectedTask, ...updatedTask} as Task)}
-        task={selectedTask ?? undefined}
-        projects={projects}
-      />
+        <TaskDialog
+          open={isEditTaskDialogOpen}
+          onOpenChange={setIsEditTaskDialogOpen}
+          onSave={(updatedTask) => handleUpdateTask({...selectedTask, ...updatedTask} as Task)}
+          task={selectedTask ?? undefined}
+          projects={projects}
+        />
        <TaskDetailDialog 
-        task={selectedTask}
-        projects={projects}
-        onOpenChange={handleCloseDetailDialog}
-        onEdit={handleOpenEditDialog}
-        onDelete={handleDeleteTask}
-      />
-      <ProjectDialog 
-        open={isProjectDialogOpen}
-        onOpenChange={setIsProjectDialogOpen}
-        onSave={handleSaveProject}
-        project={selectedProject}
-      />
-       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the "{projectToDelete?.name}" project and all its tasks. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+          task={selectedTask}
+          projects={projects}
+          onOpenChange={handleCloseDetailDialog}
+          onEdit={handleOpenEditDialog}
+          onDelete={handleDeleteTask}
+        />
+        <ProjectDialog 
+          open={isProjectDialogOpen}
+          onOpenChange={setIsProjectDialogOpen}
+          onSave={handleSaveProject}
+          project={selectedProject}
+        />
+         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the "{projectToDelete?.name}" project and all its tasks. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </>
   );
 }
