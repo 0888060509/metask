@@ -139,7 +139,7 @@ function ProjectDashboardClient({ project, projectTasks }: { project: Project, p
     return (
         <div className="flex h-full flex-col">
             <AppHeader title={project.name} />
-             <div className="border-b px-4 py-2">
+            <div className="border-b px-4 py-2">
                 <Tabs value={'dashboard'}>
                     <ProjectTabs projectId={project.id} />
                 </Tabs>
