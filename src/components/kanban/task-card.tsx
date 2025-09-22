@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -53,9 +52,6 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
     >
       <CardHeader>
         <CardTitle className="text-base break-words">{task.title}</CardTitle>
-        {task.description && (
-          <CardDescription>{task.description}</CardDescription>
-        )}
       </CardHeader>
       <CardContent className="flex flex-wrap items-center gap-2">
         {project && ProjectIcon && (

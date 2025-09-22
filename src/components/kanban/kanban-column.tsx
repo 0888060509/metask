@@ -40,11 +40,11 @@ export function KanbanColumn({ title, status, tasks, onTaskDrop, onTaskClick, pr
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={cn(
-        "flex flex-col rounded-lg border-2 border-dashed border-transparent transition-colors",
-        isOver && "border-primary bg-primary/10"
+        "flex flex-col rounded-lg transition-colors",
+        isOver && "bg-primary/10"
       )}
     >
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b bg-muted/50 rounded-t-lg">
         <h2 className="font-headline text-lg font-bold">{title}</h2>
         <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
           {tasks.length}
