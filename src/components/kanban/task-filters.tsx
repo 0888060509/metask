@@ -9,10 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { users } from "@/lib/data";
-import { Filter, X } from "lucide-react";
+import { ListFilter, X } from "lucide-react";
 import type { Filters } from '@/app/page';
 import type { TaskPriority, Project } from '@/lib/types';
-import { Badge } from '../ui/badge';
 
 type TaskFiltersProps = {
   filters: Filters;
@@ -23,31 +22,15 @@ type TaskFiltersProps = {
 const priorities: TaskPriority[] = ["high", "medium", "low"];
 
 export function TaskFilters({ filters, setFilters, projects }: TaskFiltersProps) {
-  const handleProjectCheckedChange = (projectId: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      projects: prev.projects.includes(projectId)
-        ? prev.projects.filter((id) => id !== projectId)
-        : [...prev.projects, projectId],
-    }));
-  };
 
-  const handleAssigneeCheckedChange = (assigneeId: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      assignees: prev.assignees.includes(assigneeId)
-        ? prev.assignees.filter((id) => id !== assigneeId)
-        : [...prev.assignees, assigneeId],
-    }));
-  };
-
-  const handlePriorityCheckedChange = (priority: TaskPriority) => {
-    setFilters((prev) => ({
-      ...prev,
-      priorities: prev.priorities.includes(priority)
-        ? prev.priorities.filter((p) => p !== priority)
-        : [...prev.priorities, priority],
-    }));
+  const handleFilterChange = (category: keyof Filters, value: string) => {
+    setFilters(prev => {
+      const currentCategory = prev[category] as string[];
+      const newValue = currentCategory.includes(value)
+        ? currentCategory.filter(item => item !== value)
+        : [...currentCategory, value];
+      return { ...prev, [category]: newValue };
+    });
   };
 
   const clearFilters = () => {
@@ -58,11 +41,14 @@ export function TaskFilters({ filters, setFilters, projects }: TaskFiltersProps)
 
   return (
     <div className="flex items-center gap-2 border-b bg-background/95 px-4 py-2 backdrop-blur-sm sm:px-6">
+       <div className="flex items-center gap-2">
+        <ListFilter className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium text-muted-foreground">Filters:</span>
+       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Filter className="mr-2 h-4 w-4" />
-            Filters
+          <Button variant="outline" size="sm" className={filters.projects.length > 0 ? "border-primary text-primary" : ""}>
+            Project {filters.projects.length > 0 && `(${filters.projects.length})`}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
@@ -72,58 +58,61 @@ export function TaskFilters({ filters, setFilters, projects }: TaskFiltersProps)
             <DropdownMenuCheckboxItem
               key={project.id}
               checked={filters.projects.includes(project.id)}
-              onCheckedChange={() => handleProjectCheckedChange(project.id)}
+              onCheckedChange={() => handleFilterChange("projects", project.id)}
             >
               {project.name}
             </DropdownMenuCheckboxItem>
           ))}
-          <DropdownMenuSeparator />
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className={filters.assignees.length > 0 ? "border-primary text-primary" : ""}>
+            Assignee {filters.assignees.length > 0 && `(${filters.assignees.length})`}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
           <DropdownMenuLabel>Filter by Assignee</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {users.map((user) => (
             <DropdownMenuCheckboxItem
               key={user.id}
               checked={filters.assignees.includes(user.id)}
-              onCheckedChange={() => handleAssigneeCheckedChange(user.id)}
+              onCheckedChange={() => handleFilterChange("assignees", user.id)}
             >
               {user.name}
             </DropdownMenuCheckboxItem>
           ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel>Filter by Priority</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {priorities.map(priority => (
-             <DropdownMenuCheckboxItem 
-                key={priority}
-                checked={filters.priorities.includes(priority)}
-                onCheckedChange={() => handlePriorityCheckedChange(priority)}
-             >
-                {priority.charAt(0).toUpperCase() + priority.slice(1)}
-             </DropdownMenuCheckboxItem>
-          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+       <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className={filters.priorities.length > 0 ? "border-primary text-primary" : ""}>
+            Priority {filters.priorities.length > 0 && `(${filters.priorities.length})`}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Filter by Priority</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {priorities.map(priority => (
+                <DropdownMenuCheckboxItem 
+                    key={priority}
+                    checked={filters.priorities.includes(priority)}
+                    onCheckedChange={() => handleFilterChange("priorities", priority)}
+                >
+                    {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                </DropdownMenuCheckboxItem>
+            ))}
         </DropdownMenuContent>
       </DropdownMenu>
       
       {hasActiveFilters && (
-        <>
-        <div className='flex items-center gap-2 flex-wrap'>
-          {filters.projects.map(id => {
-            const project = projects.find(p => p.id === id);
-            return <Badge variant="secondary" key={id}>{project?.name}</Badge>
-          })}
-          {filters.assignees.map(id => {
-            const user = users.find(u => u.id === id);
-            return <Badge variant="secondary" key={id}>{user?.name}</Badge>
-          })}
-          {filters.priorities.map(priority => (
-            <Badge variant="secondary" key={priority}>{priority.charAt(0).toUpperCase() + priority.slice(1)}</Badge>
-          ))}
-        </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={clearFilters}>
-            <X className="h-4 w-4 text-muted-foreground"/>
-            <span className="sr-only">Clear filters</span>
+        <Button variant="ghost" size="sm" onClick={clearFilters}>
+            <X className="mr-2 h-4 w-4 text-muted-foreground"/>
+            Clear filters
         </Button>
-        </>
       )}
     </div>
   );
