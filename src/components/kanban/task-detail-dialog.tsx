@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -103,7 +103,7 @@ export function TaskDetailDialog({
     <Dialog open={!!task} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                     <DialogTitle className="font-headline text-2xl pr-10">{task.title}</DialogTitle>
                     {task.description && <p className="text-muted-foreground pt-1">{task.description}</p>}
