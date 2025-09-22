@@ -1,16 +1,23 @@
 export type TaskStatus = "todo" | "inprogress" | "done";
 export type TaskPriority = "low" | "medium" | "high";
 
+export type Reaction = {
+  emoji: string;
+  userId: string;
+}
+
 export type Comment = {
   id: string;
   taskId: string;
   userId: string;
   text: string;
   createdAt: Date;
+  parentId?: string | null;
+  reactions?: Reaction[];
 };
 
 export type Activity = {
-  id: string;
+  id:string;
   userId: string;
   activityType: 'create' | 'update' | 'status_change' | 'comment';
   timestamp: Date;
@@ -54,7 +61,7 @@ export type Notification = {
   id: string;
   userId: string; // The user who should receive the notification
   actorId: string; // The user who performed the action
-  type: 'comment' | 'assignment' | 'status_change';
+  type: 'comment' | 'assignment' | 'status_change' | 'mention';
   taskId: string;
   isRead: boolean;
   timestamp: Date;

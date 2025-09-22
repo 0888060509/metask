@@ -128,13 +128,15 @@ export default function Home() {
     }
   };
 
-  const handleAddComment = (taskId: string, commentText: string) => {
+  const handleAddComment = (taskId: string, commentText: string, parentId?: string | null) => {
     const newComment: Comment = {
       id: `comment-${Date.now()}`,
       taskId,
       userId: "user-1", // Mocking current user
       text: commentText,
       createdAt: new Date(),
+      parentId,
+      reactions: []
     };
 
     setTasks(prevTasks => {
@@ -249,4 +251,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-

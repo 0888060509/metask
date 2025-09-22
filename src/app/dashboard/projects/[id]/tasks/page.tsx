@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -98,13 +99,15 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
     setSelectedTask(null);
   };
 
-  const handleAddComment = (taskId: string, commentText: string) => {
+  const handleAddComment = (taskId: string, commentText: string, parentId?: string | null) => {
     const newComment: Comment = {
       id: `comment-${Date.now()}`,
       taskId,
       userId: "user-1", // Mocking current user
       text: commentText,
       createdAt: new Date(),
+      parentId,
+      reactions: []
     };
 
     setTasks(prevTasks => {
@@ -144,7 +147,7 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
         (task.tagIds && task.tagIds.some(id => filters.tags.includes(id)));
       return searchMatch && assigneeMatch && priorityMatch && tagMatch;
     });
-  }, [tasks, filters, searchQuery, params.id]);
+  }, [tasks, filters, searchQuery, params]);
 
   return (
     <div className="flex h-full flex-col">

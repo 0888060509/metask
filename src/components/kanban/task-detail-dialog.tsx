@@ -4,7 +4,7 @@
 
 import React from "react";
 import { users } from "@/lib/data";
-import type { Task, TaskPriority, Project, Tag, User } from "@/lib/types";
+import type { Task, TaskPriority, Project, Tag, User, Comment, Reaction } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
@@ -53,6 +58,9 @@ import {
   Save,
   X,
   MoreHorizontal,
+  Smile,
+  MessageSquareReply,
+  Check,
 } from "lucide-react";
 import { iconMap } from "../project/icon-picker";
 import { Separator } from "../ui/separator";
@@ -66,7 +74,7 @@ type TaskDetailSheetProps = {
   onOpenChange: (open: boolean) => void;
   onUpdate: (task: Task) => void;
   onDelete: (taskId: string) => void;
-  onComment: (taskId: string, commentText: string) => void;
+  onComment: (taskId: string, commentText: string, parentId?: string | null) => void;
 };
 
 const priorityClasses: Record<TaskPriority, string> = {
@@ -81,6 +89,151 @@ const statusClasses = {
   done: "bg-green-500",
 };
 
+const availableReactions = ['👍', '🎉', '👀', '❤️', '🤔', '👎'];
+
+// A new sub-component for rendering each comment and its children
+const CommentItem = ({ 
+    comment,
+    allComments,
+    onReply,
+    onEdit,
+    onDelete,
+    onAddReaction,
+    currentUserId
+}: { 
+    comment: Comment,
+    allComments: Comment[],
+    onReply: (commentId: string, text: string) => void,
+    onEdit: (commentId: string, text: string) => void,
+    onDelete: (commentId: string) => void,
+    onAddReaction: (commentId: string, emoji: string) => void,
+    currentUserId: string
+}) => {
+    const commentUser = users.find(u => u.id === comment.userId);
+    const children = allComments.filter(c => c.parentId === comment.id);
+    
+    const [isReplying, setIsReplying] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [replyText, setReplyText] = React.useState("");
+    const [editText, setEditText] = React.useState(comment.text);
+
+    const handleReply = () => {
+        onReply(comment.id, replyText);
+        setReplyText("");
+        setIsReplying(false);
+    };
+    
+    const handleEdit = () => {
+        onEdit(comment.id, editText);
+        setIsEditing(false);
+    }
+    
+    const userHasReacted = (emoji: string) => {
+        return comment.reactions?.some(r => r.userId === currentUserId && r.emoji === emoji);
+    }
+
+    return (
+        <div className="flex items-start gap-3">
+            <Avatar className="h-8 w-8">
+                <AvatarImage src={commentUser?.avatarUrl} data-ai-hint="person portrait"/>
+                <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+                <div className="flex items-center gap-2">
+                    <p className="font-semibold text-sm">{commentUser?.name}</p>
+                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
+                </div>
+                {isEditing ? (
+                     <div className="mt-2">
+                        <Textarea value={editText} onChange={e => setEditText(e.target.value)} className="mb-2"/>
+                        <div className="flex gap-2">
+                            <Button size="sm" onClick={handleEdit}>Save</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-sm bg-muted rounded-lg p-2 mt-1 break-words whitespace-pre-wrap">{comment.text}</p>
+                )}
+
+                <div className="flex items-center gap-2 mt-1">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                             <Button size="xs" variant="ghost" className="text-muted-foreground">
+                                <Smile className="h-4 w-4 mr-1"/> Add reaction
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-1">
+                            <div className="flex gap-1">
+                                {availableReactions.map(emoji => (
+                                    <Button key={emoji} variant={userHasReacted(emoji) ? "outline-primary" : "ghost"} size="icon" className="h-8 w-8 text-lg" onClick={() => onAddReaction(comment.id, emoji)}>
+                                        {emoji}
+                                    </Button>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                    <Button size="xs" variant="ghost" className="text-muted-foreground" onClick={() => setIsReplying(!isReplying)}>
+                        <MessageSquareReply className="h-4 w-4 mr-1"/> Reply
+                    </Button>
+                     {comment.userId === currentUserId && (
+                        <>
+                        <Button size="xs" variant="ghost" className="text-muted-foreground" onClick={() => setIsEditing(!isEditing)}>
+                            <Edit className="h-4 w-4 mr-1"/> Edit
+                        </Button>
+                         <Button size="xs" variant="ghost" className="text-red-500 hover:text-red-500" onClick={() => onDelete(comment.id)}>
+                            <Trash2 className="h-4 w-4 mr-1"/> Delete
+                        </Button>
+                        </>
+                    )}
+                </div>
+                
+                 {comment.reactions && comment.reactions.length > 0 && (
+                    <div className="flex gap-1 mt-2 flex-wrap">
+                        {Object.entries(comment.reactions.reduce((acc, r) => {
+                            acc[r.emoji] = (acc[r.emoji] || 0) + 1;
+                            return acc;
+                        }, {} as Record<string, number>)).map(([emoji, count]) => (
+                            <Badge 
+                                key={emoji} 
+                                variant={userHasReacted(emoji) ? "outline-primary" : "secondary"}
+                                className="cursor-pointer"
+                                onClick={() => onAddReaction(comment.id, emoji)}
+                            >
+                                {emoji} {count}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
+
+                {isReplying && (
+                    <div className="mt-2">
+                        <Textarea value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={`Reply to ${commentUser?.name}...`} className="mb-2"/>
+                        <div className="flex gap-2">
+                            <Button size="sm" onClick={handleReply}>Reply</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setIsReplying(false)}>Cancel</Button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="mt-4 space-y-4 pl-6 border-l">
+                    {children.map(child => (
+                        <CommentItem 
+                            key={child.id} 
+                            comment={child}
+                            allComments={allComments}
+                            onReply={onReply}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            onAddReaction={onAddReaction}
+                            currentUserId={currentUserId}
+                        />
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 
 export function TaskDetailDialog({
   task,
@@ -94,6 +247,9 @@ export function TaskDetailDialog({
   const [commentText, setCommentText] = React.useState("");
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedTask, setEditedTask] = React.useState<Partial<Task>>({});
+  
+  // This would be the ID of the currently logged-in user.
+  const currentUserId = "user-1";
 
   const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
   const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
@@ -124,12 +280,46 @@ export function TaskDetailDialog({
     }
   }
 
-  const handleSendComment = () => {
-    if (task && commentText.trim()) {
-      onComment(task.id, commentText);
-      setCommentText("");
+  const handleSendComment = (text: string, parentId: string | null = null) => {
+    if (task && text.trim()) {
+      onComment(task.id, text, parentId);
+      setCommentText(""); // Clear main comment box
     }
   };
+
+  const handleEditComment = (commentId: string, newText: string) => {
+     if (!task) return;
+     const newComments = (task.comments || []).map(c => c.id === commentId ? {...c, text: newText} : c);
+     onUpdate({...task, comments: newComments});
+  }
+  
+  const handleDeleteComment = (commentId: string) => {
+      if (!task) return;
+      // This is a simple delete. A more robust solution would handle child comments.
+      const newComments = (task.comments || []).filter(c => c.id !== commentId && c.parentId !== commentId);
+      onUpdate({...task, comments: newComments});
+  }
+
+  const handleAddReaction = (commentId: string, emoji: string) => {
+    if (!task) return;
+    const newComments = (task.comments || []).map(c => {
+        if (c.id === commentId) {
+            const existingReactionIndex = (c.reactions || []).findIndex(r => r.userId === currentUserId && r.emoji === emoji);
+            let newReactions: Reaction[];
+
+            if (existingReactionIndex > -1) {
+                // User is removing their reaction
+                newReactions = c.reactions!.filter((_, index) => index !== existingReactionIndex);
+            } else {
+                // User is adding a new reaction
+                newReactions = [...(c.reactions || []), { userId: currentUserId, emoji }];
+            }
+            return {...c, reactions: newReactions};
+        }
+        return c;
+    });
+    onUpdate({...task, comments: newComments});
+  }
   
   const handleSave = () => {
     if (task) {
@@ -163,6 +353,12 @@ export function TaskDetailDialog({
     if (!task?.activity) return [];
     return [...task.activity].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }, [task?.activity]);
+  
+  const rootComments = React.useMemo(() => {
+    if (!task?.comments) return [];
+    return task.comments.filter(c => !c.parentId);
+  }, [task?.comments]);
+
 
   const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
 
@@ -257,44 +453,41 @@ export function TaskDetailDialog({
                         </TabsList>
                         <TabsContent value="comments">
                              <div className="space-y-4 mt-4">
-                                {task.comments && task.comments.length > 0 ? (
-                                    task.comments.map((comment) => {
-                                        const commentUser = users.find(u => u.id === comment.userId);
-                                        return (
-                                        <div key={comment.id} className="flex items-start gap-3">
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarImage src={commentUser?.avatarUrl} data-ai-hint="person portrait"/>
-                                                <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-semibold text-sm">{commentUser?.name}</p>
-                                                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
-                                                </div>
-                                                <p className="text-sm bg-muted rounded-lg p-2 mt-1 break-words">{comment.text}</p>
-                                            </div>
-                                        </div>
-                                        );
-                                    })
+                                <div className="relative">
+                                    <Textarea 
+                                        placeholder="Add a comment..." 
+                                        className="pr-12"
+                                        value={commentText}
+                                        onChange={(e) => setCommentText(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(commentText); } }}
+                                    />
+                                    <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => handleSendComment(commentText)}>
+                                        <Send className="h-4 w-4"/>
+                                        <span className="sr-only">Send Comment</span>
+                                    </Button>
+                                </div>
+                                
+                                {rootComments && rootComments.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {rootComments.map((comment) => (
+                                            <CommentItem
+                                                key={comment.id}
+                                                comment={comment}
+                                                allComments={task.comments || []}
+                                                onReply={(parentId, text) => handleSendComment(text, parentId)}
+                                                onEdit={handleEditComment}
+                                                onDelete={handleDeleteComment}
+                                                onAddReaction={handleAddReaction}
+                                                currentUserId={currentUserId}
+                                            />
+                                        ))}
+                                    </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed h-full">
                                         <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
                                         <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
                                     </div>
                                 )}
-                                <div className="relative mt-auto">
-                                    <Textarea 
-                                        placeholder="Add a comment..." 
-                                        className="pr-12"
-                                        value={commentText}
-                                        onChange={(e) => setCommentText(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
-                                    />
-                                    <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
-                                        <Send className="h-4 w-4"/>
-                                        <span className="sr-only">Send Comment</span>
-                                    </Button>
-                                </div>
                             </div>
                         </TabsContent>
                         <TabsContent value="activity">

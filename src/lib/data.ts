@@ -40,8 +40,10 @@ export const tasks: Task[] = [
     projectId: "proj-1",
     tagIds: ["tag-1", "tag-2"],
     comments: [
-      { id: 'comment-1', taskId: 'task-1', userId: 'user-2', text: "How's this going?", createdAt: new Date(new Date().setDate(new Date().getDate() - 1)) },
-      { id: 'comment-2', taskId: 'task-1', userId: 'user-1', text: "Almost done, will share soon.", createdAt: new Date() },
+      { id: 'comment-1', taskId: 'task-1', userId: 'user-2', text: "How's this going? Any blockers?", createdAt: new Date(new Date().setDate(new Date().getDate() - 1)), parentId: null, reactions: [{emoji: '👀', userId: 'user-4'}] },
+      { id: 'comment-2', taskId: 'task-1', userId: 'user-1', text: "Almost done, will share soon. The new design system is making this a breeze.", createdAt: new Date(), parentId: 'comment-1', reactions: [{emoji: '👍', userId: 'user-2'}] },
+      { id: 'comment-3', taskId: 'task-1', userId: 'user-4', text: "Can't wait to see it!", createdAt: new Date(), parentId: 'comment-2', reactions: []},
+      { id: 'comment-4', taskId: 'task-1', userId: 'user-2', text: "What about the mobile view?", createdAt: new Date(), parentId: null, reactions: [] },
     ],
     activity: [
       { id: 'act-1', userId: 'user-2', activityType: 'comment', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)), details: 'Mike Johnson added a comment.' },
