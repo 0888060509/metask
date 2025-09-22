@@ -2,9 +2,15 @@
 "use client"
 
 import React from 'react';
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Cell } from 'recharts';
 import type { User, Task } from '@/lib/types';
-import { ChartTooltip, ChartTooltipContent } from '../ui/chart';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart"
 
 type WorkloadChartProps = {
     users: User[];
@@ -42,40 +48,43 @@ export function WorkloadDistributionChart({ users, tasks }: WorkloadChartProps) 
 
     return (
         <div className="h-[350px] w-full">
-            <ResponsiveContainer>
-                <BarChart data={workloadData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis 
-                        dataKey="name" 
-                        tickLine={false} 
-                        axisLine={false} 
-                        tickMargin={8}
-                        className="text-xs"
-                    />
-                    <YAxis 
-                        tickLine={false} 
-                        axisLine={false} 
-                        tickMargin={8} 
-                        allowDecimals={false}
-                        label={{ value: 'Number of Tasks', angle: -90, position: 'insideLeft', offset: -10, style: { textAnchor: 'middle' } }}
-                    />
-                    <Tooltip
-                        content={<ChartTooltipContent indicator="dot" />}
-                        cursor={{fill: 'hsl(var(--muted))'}}
-                    />
-                    <Legend />
-                    <Bar dataKey="todo" stackId="a" fill="var(--color-todo)" radius={[4, 4, 0, 0]}>
-                         {workloadData.map((entry, index) => (
-                            <Cell key={`cell-todo-${index}`} fill={entry.total > workloadThreshold ? 'hsl(var(--destructive))' : 'hsl(var(--chart-1))'} opacity={0.6}/>
-                        ))}
-                    </Bar>
-                    <Bar dataKey="inprogress" stackId="a" fill="var(--color-inprogress)" radius={[4, 4, 0, 0]}>
-                        {workloadData.map((entry, index) => (
-                            <Cell key={`cell-inprogress-${index}`} fill={entry.total > workloadThreshold ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))'} />
-                        ))}
-                    </Bar>
-                </BarChart>
-            </ResponsiveContainer>
+            <ChartContainer config={chartConfig} className="w-full h-full">
+                <ResponsiveContainer>
+                    <BarChart data={workloadData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis 
+                            dataKey="name" 
+                            tickLine={false} 
+                            axisLine={false} 
+                            tickMargin={8}
+                            className="text-xs"
+                        />
+                        <YAxis 
+                            tickLine={false} 
+                            axisLine={false} 
+                            tickMargin={8} 
+                            allowDecimals={false}
+                            label={{ value: 'Number of Tasks', angle: -90, position: 'insideLeft', offset: -10, style: { textAnchor: 'middle' } }}
+                        />
+                        <ChartTooltip
+                            content={<ChartTooltipContent indicator="dot" />}
+                            cursor={{fill: 'hsl(var(--muted))'}}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="todo" stackId="a" fill="var(--color-todo)" radius={[4, 4, 0, 0]}>
+                            {workloadData.map((entry, index) => (
+                                <Cell key={`cell-todo-${index}`} fill={entry.total > workloadThreshold ? 'hsl(var(--destructive))' : 'hsl(var(--chart-1))'} opacity={0.6}/>
+                            ))}
+                        </Bar>
+                        <Bar dataKey="inprogress" stackId="a" fill="var(--color-inprogress)" radius={[4, 4, 0, 0]}>
+                            {workloadData.map((entry, index) => (
+                                <Cell key={`cell-inprogress-${index}`} fill={entry.total > workloadThreshold ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))'} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </ChartContainer>
         </div>
     );
 }
+
