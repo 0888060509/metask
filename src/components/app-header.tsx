@@ -21,36 +21,20 @@ import {
   User,
 } from "lucide-react";
 import { SidebarTrigger } from "./ui/sidebar";
-import { AppSidebar } from "./app-sidebar";
-import type { Project } from "@/lib/types";
 
 type AppHeaderProps = {
   onNewTaskClick: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  projects: Project[];
-  onNewProjectClick: () => void;
-  onEditProject: (project: Project) => void;
-  onDeleteProject: (project: Project) => void;
 };
 
 export function AppHeader({ 
   onNewTaskClick, 
   searchQuery, 
   setSearchQuery,
-  projects,
-  onNewProjectClick,
-  onEditProject,
-  onDeleteProject,
 }: AppHeaderProps) {
   return (
     <>
-      <AppSidebar 
-        projects={projects} 
-        onNewProjectClick={onNewProjectClick}
-        onEditProject={onEditProject}
-        onDeleteProject={onDeleteProject}
-      />
       <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
         <SidebarTrigger className="md:hidden" />
         <div className="flex w-full items-center justify-between">

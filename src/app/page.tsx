@@ -19,6 +19,7 @@ import {
 import { ProjectDialog } from "@/components/project/project-dialog";
 import { tasks as initialTasks, projects as initialProjects } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export type Filters = {
   projects: string[];
@@ -140,15 +141,18 @@ export default function Home() {
   }, [tasks, filters, searchQuery]);
 
   return (
+    <>
+    <AppSidebar 
+        projects={projects} 
+        onNewProjectClick={handleCreateProject}
+        onEditProject={handleEditProject}
+        onDeleteProject={confirmDeleteProject}
+      />
     <div className="flex h-full flex-col">
       <AppHeader 
         onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        projects={projects}
-        onNewProjectClick={handleCreateProject}
-        onEditProject={handleEditProject}
-        onDeleteProject={confirmDeleteProject}
       />
       <TaskFilters filters={filters} setFilters={setFilters} projects={projects} />
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -200,5 +204,6 @@ export default function Home() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </>
   );
 }
