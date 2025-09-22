@@ -87,7 +87,7 @@ function ProjectTasksClient({ project, projectTasks }: { project: Project, proje
     <div className="flex h-full flex-col">
        <div className="sticky top-0 z-10 bg-background">
           <AppHeader title={project.name} />
-          <div className="border-b px-4 py-2">
+          <div className="border-b bg-background px-4 py-2">
               <Tabs value={'tasks'}>
                   <ProjectTabs projectId={project.id} />
               </Tabs>
