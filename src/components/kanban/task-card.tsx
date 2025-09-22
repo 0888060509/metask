@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { users, tags } from "@/lib/data";
-import type { Task, Project, Tag } from "@/lib/types";
+import type { Task, Project, Tag, User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -30,7 +30,7 @@ const priorityClasses: Record<Task["priority"], string> = {
 };
 
 export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
-  const assignee = users.find((user) => user.id === task.assigneeId);
+  const assignees = task.assigneeIds?.map(id => users.find(user => user.id === id)).filter(Boolean) as User[];
   const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
@@ -88,13 +88,17 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
             </>
           )}
         </div>
-        {assignee && (
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
-            <AvatarFallback>
-              {assignee.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        {assignees && assignees.length > 0 && (
+          <div className="flex -space-x-2 overflow-hidden">
+            {assignees.map(assignee => (
+                <Avatar key={assignee.id} className="h-8 w-8 border-2 border-background">
+                  <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
+                  <AvatarFallback>
+                    {assignee.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+            ))}
+          </div>
         )}
       </CardFooter>
     </Card>

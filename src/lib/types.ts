@@ -30,7 +30,7 @@ export type Task = {
   status: TaskStatus;
   priority: TaskPriority;
   deadline?: Date;
-  assigneeId?: string;
+  assigneeIds?: string[];
   projectId: string;
   tagIds?: string[];
   comments?: Comment[];

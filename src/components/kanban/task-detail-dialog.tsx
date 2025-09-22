@@ -3,7 +3,7 @@
 
 import React from "react";
 import { users, tags } from "@/lib/data";
-import type { Task, TaskPriority, Project, Tag } from "@/lib/types";
+import type { Task, TaskPriority, Project, Tag, User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
   Calendar,
   Flag,
-  User,
+  User as UserIcon,
   Folder,
   Tag as TagIcon,
   CheckCircle,
@@ -102,8 +102,12 @@ export function TaskDetailDialog({
   onComment,
 }: TaskDetailSheetProps) {
   const [commentText, setCommentText] = React.useState("");
+
+  const assignees = React.useMemo(() => {
+    if (!task?.assigneeIds) return [];
+    return task.assigneeIds.map(id => users.find(user => user.id === id)).filter(Boolean) as User[];
+  }, [task?.assigneeIds]);
   
-  const assignee = task ? users.find((user) => user.id === task.assigneeId) : null;
   const project = task ? projects.find((p) => p.id === task.projectId) : null;
   const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
 
@@ -199,17 +203,21 @@ export function TaskDetailDialog({
                               </span>
                           </DetailRow>
 
-                          {assignee && (
-                              <DetailRow icon={User} label="Assignee">
-                              <div className="flex items-center gap-2">
-                                  <Avatar className="h-6 w-6">
-                                  <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
-                                  <AvatarFallback>
-                                      {assignee.name.charAt(0)}
-                                  </AvatarFallback>
-                                  </Avatar>
-                                  <span>{assignee.name}</span>
-                              </div>
+                          {assignees && assignees.length > 0 && (
+                              <DetailRow icon={UserIcon} label="Assignees">
+                                <div className="flex flex-col gap-2">
+                                  {assignees.map(assignee => (
+                                    <div key={assignee.id} className="flex items-center gap-2">
+                                      <Avatar className="h-6 w-6">
+                                        <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
+                                        <AvatarFallback>
+                                            {assignee.name.charAt(0)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <span>{assignee.name}</span>
+                                    </div>
+                                  ))}
+                                </div>
                               </DetailRow>
                           )}
 

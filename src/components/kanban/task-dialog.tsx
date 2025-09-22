@@ -37,7 +37,7 @@ type TaskDialogProps = {
 export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskDialogProps) {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [assigneeId, setAssigneeId] = React.useState<string | undefined>();
+  const [assigneeIds, setAssigneeIds] = React.useState<string[]>([]);
   const [projectId, setProjectId] = React.useState("");
   const [priority, setPriority] = React.useState<TaskPriority>("medium");
   const [deadline, setDeadline] = React.useState<Date | undefined>();
@@ -52,7 +52,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
     onSave({
       title,
       description,
-      assigneeId,
+      assigneeIds,
       projectId,
       priority,
       deadline,
@@ -65,7 +65,7 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
     if (open) {
         setTitle(task?.title || "");
         setDescription(task?.description || "");
-        setAssigneeId(task?.assigneeId);
+        setAssigneeIds(task?.assigneeIds || []);
         setProjectId(task?.projectId || "");
         setPriority(task?.priority || 'medium');
         setDeadline(task?.deadline);
@@ -105,16 +105,16 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
               className="col-span-3"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="assignee" className="text-right">
-              Assignee
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="assignees" className="text-right pt-2">
+              Assignees
             </Label>
-            <Combobox
+            <MultiSelectCombobox
               className="col-span-3"
               options={userOptions}
-              value={assigneeId}
-              onValueChange={setAssigneeId}
-              placeholder="Select an assignee"
+              selected={assigneeIds}
+              onSelectedChange={setAssigneeIds}
+              placeholder="Select assignees"
               searchPlaceholder="Search assignees..."
               emptyResult="No assignees found."
             />

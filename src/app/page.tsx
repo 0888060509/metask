@@ -161,7 +161,7 @@ export default function Home() {
         filters.projects.includes(task.projectId);
       const assigneeMatch =
         filters.assignees.length === 0 ||
-        (task.assigneeId && filters.assignees.includes(task.assigneeId));
+        (task.assigneeIds && task.assigneeIds.some(id => filters.assignees.includes(id)));
       const priorityMatch =
         filters.priorities.length === 0 ||
         filters.priorities.includes(task.priority);
