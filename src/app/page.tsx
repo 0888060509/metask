@@ -50,12 +50,15 @@ export default function Home() {
   });
 
   // Task handlers
-  const handleCreateTask = (newTask: Omit<Task, "id" | "status">) => {
+  const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
     const taskWithId: Task = {
       ...newTask,
       id: `task-${Date.now()}`,
       status: "todo",
       comments: [],
+      activity: [
+        { id: `act-${Date.now()}`, userId: 'user-1', activityType: 'create', timestamp: new Date(), details: 'You created the task.' }
+      ],
     };
     setTasks((prevTasks) => [...prevTasks, taskWithId]);
   };
@@ -204,26 +207,20 @@ export default function Home() {
             onSave={handleCreateTask}
             projects={projects}
           />
-          <TaskDialog
-            open={isEditTaskDialogOpen}
-            onOpenChange={(isOpen) => {
-                setIsEditTaskDialogOpen(isOpen);
-                // If we are closing the edit dialog, re-open the detail view if a task is selected
-                if (!isOpen && selectedTask) {
-                  // This is a bit of a hack to re-open the detail view,
-                  // there might be a cleaner way to manage this state.
-                  // For now, it ensures the detail view is shown after editing.
+          {selectedTask && (
+            <TaskDialog
+                open={isEditTaskDialogOpen}
+                onOpenChange={setIsEditTaskDialogOpen}
+                onSave={(updatedTaskData) => {
+                if (selectedTask) {
+                    const updatedTask = {...selectedTask, ...updatedTaskData};
+                    handleUpdateTask(updatedTask);
                 }
-            }}
-            onSave={(updatedTaskData) => {
-              if (selectedTask) {
-                const updatedTask = {...selectedTask, ...updatedTaskData};
-                handleUpdateTask(updatedTask);
-              }
-            }}
-            task={selectedTask ?? undefined}
-            projects={projects}
-          />
+                }}
+                task={selectedTask}
+                projects={projects}
+            />
+          )}
          <TaskDetailDialog 
             task={selectedTask}
             projects={projects}

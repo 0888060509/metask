@@ -87,13 +87,6 @@ function DetailRow({
   );
 }
 
-const activityIconMap = {
-  create: PlusCircle,
-  update: Edit,
-  status_change: ArrowRight,
-  comment: MessageCircle,
-};
-
 export function TaskDetailDialog({
   task,
   projects,
@@ -105,7 +98,7 @@ export function TaskDetailDialog({
   const [commentText, setCommentText] = React.useState("");
 
   const handleEdit = () => {
-    onOpenChange(false);
+    // onOpenChange(false);
     onEdit();
   };
   
@@ -122,7 +115,7 @@ export function TaskDetailDialog({
       setCommentText("");
     }
   };
-
+  
   const assignees = React.useMemo(() => {
     if (!task?.assigneeIds) return [];
     return task.assigneeIds.map(id => users.find(user => user.id === id)).filter(Boolean) as User[];
@@ -132,16 +125,16 @@ export function TaskDetailDialog({
     if (!task) return null;
     return projects.find((p) => p.id === task.projectId);
   }, [task, projects]);
-  
-  const sortedActivity = React.useMemo(() => {
-    if (!task?.activity) return [];
-    return [...task.activity].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  }, [task?.activity]);
-  
+
   const taskTags = React.useMemo(() => {
     if (!task?.tagIds) return [];
     return task.tagIds.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as Tag[];
   }, [task?.tagIds]);
+
+  const sortedActivity = React.useMemo(() => {
+    if (!task?.activity) return [];
+    return [...task.activity].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }, [task?.activity]);
 
   const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
 
