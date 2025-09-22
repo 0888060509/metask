@@ -152,8 +152,8 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
       <SidebarFooter>
          <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="#">
+            <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/settings")}>
+              <Link href="/dashboard/settings">
                 <Settings />
                 Settings
               </Link>
