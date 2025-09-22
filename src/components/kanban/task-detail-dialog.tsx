@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -7,18 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -34,11 +38,12 @@ import {
   Trash2,
   MessageSquare,
   Clock,
+  Send,
 } from "lucide-react";
 import { iconMap } from "../project/icon-picker";
 
 
-type TaskDetailDialogProps = {
+type TaskDetailSheetProps = {
   task: Task | null;
   projects: Project[];
   onOpenChange: (open: boolean) => void;
@@ -68,12 +73,12 @@ function DetailRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-4 items-start gap-4">
-      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+    <div className="grid grid-cols-3 items-start gap-4">
+      <div className="flex col-span-1 items-center gap-2 text-sm font-medium text-muted-foreground">
         <Icon className="h-4 w-4" />
         <span>{label}</span>
       </div>
-      <div className="col-span-3 text-sm">{children}</div>
+      <div className="col-span-2 text-sm">{children}</div>
     </div>
   );
 }
@@ -84,7 +89,7 @@ export function TaskDetailDialog({
   onOpenChange,
   onEdit,
   onDelete,
-}: TaskDetailDialogProps) {
+}: TaskDetailSheetProps) {
   if (!task) return null;
 
   const assignee = users.find((user) => user.id === task.assigneeId);
@@ -102,14 +107,11 @@ export function TaskDetailDialog({
   }
 
   return (
-    <Dialog open={!!task} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 space-y-1">
-                    <DialogTitle className="font-headline text-2xl">{task.title}</DialogTitle>
-                    {task.description && <p className="text-muted-foreground pt-1">{task.description}</p>}
-                </div>
+    <Sheet open={!!task} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right">
+        <SheetHeader className="p-6">
+            <div className="flex items-center justify-between gap-4">
+                <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
                 <div className="flex items-center gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -131,15 +133,14 @@ export function TaskDetailDialog({
                     </DropdownMenu>
                 </div>
             </div>
-        </DialogHeader>
-        <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="comments">Comments</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
-            </TabsList>
-            <TabsContent value="details" className="py-4">
-                <div className="grid gap-4">
+            {task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>}
+        </SheetHeader>
+        
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6 pt-0">
+            {/* Left Column: Details */}
+            <div className="md:col-span-2 space-y-6">
+                 <div className="space-y-4 rounded-lg border p-4">
+                     <h3 className="font-semibold text-lg">Details</h3>
                     <DetailRow icon={CheckCircle} label="Status">
                         <Badge className={cn("text-white", statusClasses[task.status])}>
                         {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
@@ -194,24 +195,40 @@ export function TaskDetailDialog({
                         </div>
                         </DetailRow>
                     )}
+                 </div>
+            </div>
+
+            {/* Right Column: Comments & Activity */}
+            <div className="md:col-span-1 space-y-6">
+                <div className="space-y-4">
+                     <h3 className="font-semibold text-lg flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" /> Comments</h3>
+                     <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
+                        <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
+                        <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
+                    </div>
                 </div>
-            </TabsContent>
-             <TabsContent value="comments">
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <MessageSquare className="h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-4 text-lg font-medium">No comments yet</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Be the first to add a comment.</p>
+
+                 <Separator />
+
+                 <div className="space-y-4">
+                     <h3 className="font-semibold text-lg flex items-center gap-2"><Clock className="w-5 h-5 text-muted-foreground" /> Activity</h3>
+                    <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
+                        <Clock className="h-10 w-10 text-muted-foreground/30" />
+                        <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
+                    </div>
                 </div>
-            </TabsContent>
-            <TabsContent value="activity">
-                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Clock className="h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-4 text-lg font-medium">No activity yet</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Recent changes to this task will appear here.</p>
-                </div>
-            </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+            </div>
+        </div>
+        <SheetFooter className="p-6 pt-0">
+            <div className="relative w-full">
+                <Textarea placeholder="Add a comment..." className="pr-12"/>
+                <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8">
+                    <Send className="h-4 w-4"/>
+                    <span className="sr-only">Send Comment</span>
+                </Button>
+            </div>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
