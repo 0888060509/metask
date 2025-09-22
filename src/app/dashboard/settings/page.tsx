@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -27,9 +28,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function SettingsPage() {
   const { setTheme, theme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
   // This would be the ID of the currently logged-in user.
   const currentUserId = "user-4"
   const currentUser = users.find((user) => user.id === currentUserId)
+  
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
 
   return (
     <div className="flex h-full flex-col">
@@ -75,16 +83,18 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="theme">Theme</Label>
-                <Select value={theme} onValueChange={setTheme}>
-                  <SelectTrigger id="theme">
-                    <SelectValue placeholder="Select theme" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
-                  </SelectContent>
-                </Select>
+                {mounted && (
+                    <Select value={theme} onValueChange={setTheme}>
+                        <SelectTrigger id="theme">
+                            <SelectValue placeholder="Select theme" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="light">Light</SelectItem>
+                            <SelectItem value="dark">Dark</SelectItem>
+                            <SelectItem value="system">System</SelectItem>
+                        </SelectContent>
+                    </Select>
+                )}
               </div>
             </CardContent>
           </Card>
