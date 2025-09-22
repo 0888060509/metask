@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -104,30 +103,28 @@ export function TaskDetailDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
             <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                    <DialogTitle className="font-headline text-2xl pr-10">{task.title}</DialogTitle>
+                <div className="flex-1 space-y-1">
+                    <DialogTitle className="font-headline text-2xl">{task.title}</DialogTitle>
                     {task.description && <p className="text-muted-foreground pt-1">{task.description}</p>}
                 </div>
-                <div className="flex items-center gap-2">
-                  <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                          <MoreVertical className="h-5 w-5" />
-                          <span className="sr-only">More actions</span>
-                      </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={handleEdit}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          <span>Edit</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
-                      </DropdownMenuItem>
-                      </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                        <MoreVertical className="h-5 w-5" />
+                        <span className="sr-only">More actions</span>
+                    </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleEdit}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                    </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </DialogHeader>
         <div className="grid gap-4 py-4">
