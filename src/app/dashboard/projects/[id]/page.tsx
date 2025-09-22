@@ -5,7 +5,7 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { projects, tasks as allTasks } from "@/lib/data";
+import { tasks, projects } from "@/lib/data";
 import { Task, Project } from "@/lib/types";
 import { notFound } from 'next/navigation';
 import { differenceInBusinessDays, formatDistanceToNow, isAfter, isBefore } from "date-fns";
@@ -195,7 +195,7 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
     if (!project) {
         notFound();
     }
-    const projectTasks = allTasks.filter(t => t.projectId === params.id);
+    const projectTasks = tasks.filter(t => t.projectId === params.id);
     
     return <ProjectDashboardClient project={project} projectTasks={projectTasks} />;
 }
