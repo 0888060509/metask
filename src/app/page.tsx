@@ -6,11 +6,22 @@ import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { TaskFilters } from "@/components/kanban/task-filters";
 import { tasks as initialTasks } from "@/lib/data";
-import type { Task } from "@/lib/types";
+import type { Task, TaskPriority } from "@/lib/types";
+
+export type Filters = {
+  projects: string[];
+  assignees: string[];
+  priorities: TaskPriority[];
+};
 
 export default function Home() {
   const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [filters, setFilters] = React.useState<Filters>({
+    projects: [],
+    assignees: [],
+    priorities: [],
+  });
 
   const handleCreateTask = (newTask: Omit<Task, "id" | "status">) => {
     const taskWithId: Task = {
@@ -21,12 +32,27 @@ export default function Home() {
     setTasks((prevTasks) => [...prevTasks, taskWithId]);
   };
 
+  const filteredTasks = React.useMemo(() => {
+    return tasks.filter((task) => {
+      const projectMatch =
+        filters.projects.length === 0 ||
+        filters.projects.includes(task.projectId);
+      const assigneeMatch =
+        filters.assignees.length === 0 ||
+        (task.assigneeId && filters.assignees.includes(task.assigneeId));
+      const priorityMatch =
+        filters.priorities.length === 0 ||
+        filters.priorities.includes(task.priority);
+      return projectMatch && assigneeMatch && priorityMatch;
+    });
+  }, [tasks, filters]);
+
   return (
     <div className="flex h-full flex-col">
       <AppHeader onNewTaskClick={() => setIsDialogOpen(true)} />
-      <TaskFilters />
+      <TaskFilters filters={filters} setFilters={setFilters} />
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <KanbanBoard tasks={tasks} setTasks={setTasks} />
+        <KanbanBoard tasks={filteredTasks} setTasks={setTasks} />
       </div>
       <TaskDialog
         open={isDialogOpen}
