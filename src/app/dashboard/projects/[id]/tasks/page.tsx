@@ -10,17 +10,6 @@ import { AppHeader } from "@/components/app-header";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { ProjectDialog } from "@/components/project/project-dialog";
 import { projects as allProjects } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,14 +34,9 @@ function ProjectTabs({ projectId }: { projectId: string }) {
     );
 }
 
-function ProjectTasksClient({ params }: { params: { id: string } }) {
-  const project = allProjects.find(p => p.id === params.id);
+function ProjectTasksClient({ project }: { project: Project }) {
   const context = React.useContext(DashboardContext);
     
-  if (!project) {
-      notFound();
-  }
-  
   if (!context) return null;
   const { tasks, setTasks, openTask, tags, projects } = context;
 
@@ -83,7 +67,7 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
   
   const filteredTasks = React.useMemo(() => {
     return tasks.filter((task) => {
-      if (task.projectId !== params.id) return false;
+      if (task.projectId !== project.id) return false;
 
       const searchMatch =
         searchQuery.trim() === "" ||
@@ -100,7 +84,7 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
         (task.tagIds && task.tagIds.some(id => filters.tags.includes(id)));
       return searchMatch && assigneeMatch && priorityMatch && tagMatch;
     });
-  }, [tasks, filters, searchQuery, params.id]);
+  }, [tasks, filters, searchQuery, project.id]);
 
   return (
     <div className="flex h-full flex-col">
@@ -146,5 +130,11 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
 
 // This is the new Server Component wrapper
 export default function ProjectTasksPage({ params }: { params: { id: string } }) {
-    return <ProjectTasksClient params={params} />;
+    const project = allProjects.find(p => p.id === params.id);
+    
+    if (!project) {
+        notFound();
+    }
+  
+    return <ProjectTasksClient project={project} />;
 }

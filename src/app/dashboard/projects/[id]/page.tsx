@@ -5,7 +5,7 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { allProjects } from "@/lib/data";
+import { projects as allProjects, tasks as allTasks } from "@/lib/data";
 import { Task, Project } from "@/lib/types";
 import { notFound } from 'next/navigation';
 import { differenceInBusinessDays, formatDistanceToNow, isAfter, isBefore } from "date-fns";
@@ -125,19 +125,11 @@ function ProjectTabs({ projectId }: { projectId: string }) {
 }
 
 
-function ProjectDashboardClient({ params }: { params: { id: string } }) {
+function ProjectDashboardClient({ project, projectTasks }: { project: Project, projectTasks: Task[] }) {
     const context = React.useContext(DashboardContext);
     
     if (!context) return null;
-    const { tasks, openTask, projects } = context;
-    
-    const project = projects.find(p => p.id === params.id);
-
-    if (!project) {
-        notFound();
-    }
-
-    const projectTasks = tasks.filter(t => t.projectId === params.id);
+    const { openTask } = context;
 
     const tasksByStatus = projectTasks.reduce((acc, task) => {
         acc[task.status] = (acc[task.status] || 0) + 1;
@@ -147,7 +139,7 @@ function ProjectDashboardClient({ params }: { params: { id: string } }) {
 
     return (
         <div className="flex h-full flex-col">
-            <AppHeader title={project.name} />
+             <AppHeader title={project.name} />
             <div className="border-b px-4 py-2">
                 <Tabs value={'dashboard'}>
                     <ProjectTabs projectId={project.id} />
@@ -199,5 +191,11 @@ function ProjectDashboardClient({ params }: { params: { id: string } }) {
 
 // This is the new Server Component wrapper
 export default function ProjectDashboardPage({ params }: { params: { id: string } }) {
-    return <ProjectDashboardClient params={params} />;
+    const project = allProjects.find(p => p.id === params.id);
+    if (!project) {
+        notFound();
+    }
+    const projectTasks = allTasks.filter(t => t.projectId === params.id);
+    
+    return <ProjectDashboardClient project={project} projectTasks={projectTasks} />;
 }
