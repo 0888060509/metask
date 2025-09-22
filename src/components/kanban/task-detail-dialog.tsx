@@ -181,7 +181,7 @@ const CommentItem = ({
                                 <Smile className="h-4 w-4 mr-1"/> Add reaction
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-2 border-0 shadow-xl">
+                        <PopoverContent className="w-auto p-2 border-0 shadow-xl bg-background">
                             <div className="flex gap-1">
                                 {availableReactions.map(emoji => (
                                     <Button 
