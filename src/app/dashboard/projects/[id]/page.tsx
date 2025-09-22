@@ -131,7 +131,15 @@ function ProjectTabs({ projectId }: { projectId: string }) {
 }
 
 
-function ProjectDashboardClient({ project, projectTasks }: { project: Project, projectTasks: Task[] }) {
+function ProjectDashboardClient({ params }: { params: { id: string } }) {
+    const project = allProjects.find(p => p.id === params.id);
+    
+    if (!project) {
+        notFound();
+    }
+
+    const projectTasks = allTasks.filter(t => t.projectId === params.id);
+
     const tasksByStatus = projectTasks.reduce((acc, task) => {
         acc[task.status] = (acc[task.status] || 0) + 1;
         return acc;
@@ -188,13 +196,5 @@ function ProjectDashboardClient({ project, projectTasks }: { project: Project, p
 
 // This is the new Server Component wrapper
 export default function ProjectDashboardPage({ params }: { params: { id: string } }) {
-    const project = allProjects.find(p => p.id === params.id);
-    
-    if (!project) {
-        notFound();
-    }
-
-    const projectTasks = allTasks.filter(t => t.projectId === params.id);
-    
-    return <ProjectDashboardClient project={project} projectTasks={projectTasks} />;
+    return <ProjectDashboardClient params={params} />;
 }

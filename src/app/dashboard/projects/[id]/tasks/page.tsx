@@ -53,7 +53,13 @@ function ProjectTabs({ projectId }: { projectId: string }) {
     );
 }
 
-function ProjectTasksClient({ project, params }: { project: Project; params: { id: string } }) {
+function ProjectTasksClient({ params }: { params: { id: string } }) {
+  const project = allProjects.find(p => p.id === params.id);
+    
+  if (!project) {
+      notFound();
+  }
+
   const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
   const [projects, setProjects] = React.useState<Project[]>(allProjects);
   const [tags, setTags] = React.useState<Tag[]>(initialTags);
@@ -225,11 +231,5 @@ function ProjectTasksClient({ project, params }: { project: Project; params: { i
 
 // This is the new Server Component wrapper
 export default function ProjectTasksPage({ params }: { params: { id: string } }) {
-    const project = allProjects.find(p => p.id === params.id);
-    
-    if (!project) {
-        notFound();
-    }
-
-    return <ProjectTasksClient project={project} params={params} />;
+    return <ProjectTasksClient params={params} />;
 }
