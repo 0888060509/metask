@@ -4,7 +4,7 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { tasks as allTasks, projects as allProjects, users } from "@/lib/data";
+import { tasks as allTasks, projects as allProjects } from "@/lib/data";
 import { Task, Project } from "@/lib/types";
 import { notFound, usePathname } from 'next/navigation';
 import { differenceInBusinessDays, formatDistanceToNow, isAfter, isBefore } from "date-fns";
@@ -12,8 +12,8 @@ import { BurndownChart } from "@/components/project/burndown-chart";
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { buttonVariants } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 function TaskAgeingCard({ tasks }: { tasks: Task[] }) {
     const inProgressTasks = tasks
@@ -130,14 +130,7 @@ function ProjectTabs({ projectId }: { projectId: string }) {
 }
 
 
-export default function ProjectDashboardPage({ params }: { params: { id: string } }) {
-    const project = allProjects.find(p => p.id === params.id);
-    const projectTasks = allTasks.filter(t => t.projectId === params.id);
-    
-    if (!project) {
-        notFound();
-    }
-    
+function ProjectDashboardClient({ project, projectTasks }: { project: Project, projectTasks: Task[] }) {
     const tasksByStatus = projectTasks.reduce((acc, task) => {
         acc[task.status] = (acc[task.status] || 0) + 1;
         return acc;
@@ -190,4 +183,17 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
             </div>
         </div>
     );
+}
+
+// This is the new Server Component wrapper
+export default function ProjectDashboardPage({ params }: { params: { id: string } }) {
+    const project = allProjects.find(p => p.id === params.id);
+    
+    if (!project) {
+        notFound();
+    }
+
+    const projectTasks = allTasks.filter(t => t.projectId === project.id);
+    
+    return <ProjectDashboardClient project={project} projectTasks={projectTasks} />;
 }
