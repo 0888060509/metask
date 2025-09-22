@@ -1,3 +1,4 @@
+
 "use client";
 
 import { users, tags } from "@/lib/data";
@@ -37,8 +38,8 @@ type TaskDialogProps = {
 export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskDialogProps) {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [assigneeIds, setAssigneeIds] = React.useState<string[]>([]);
   const [projectId, setProjectId] = React.useState("");
+  const [assigneeIds, setAssigneeIds] = React.useState<string[]>([]);
   const [priority, setPriority] = React.useState<TaskPriority>("medium");
   const [deadline, setDeadline] = React.useState<Date | undefined>();
   const [tagIds, setTagIds] = React.useState<string[]>([]);
@@ -65,8 +66,8 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
     if (open) {
         setTitle(task?.title || "");
         setDescription(task?.description || "");
-        setAssigneeIds(task?.assigneeIds || []);
         setProjectId(task?.projectId || "");
+        setAssigneeIds(task?.assigneeIds || []);
         setPriority(task?.priority || 'medium');
         setDeadline(task?.deadline);
         setTagIds(task?.tagIds || []);
@@ -105,6 +106,21 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
               className="col-span-3"
             />
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="priority" className="text-right">
+              Priority
+            </Label>
+            <Select value={priority} onValueChange={(v) => setPriority(v as TaskPriority)}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select a priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-4 items-start gap-4">
             <Label htmlFor="assignees" className="text-right pt-2">
               Assignees
@@ -132,21 +148,6 @@ export function TaskDialog({ open, onOpenChange, task, onSave, projects }: TaskD
                 searchPlaceholder="Search projects..."
                 emptyResult="No projects found."
             />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="priority" className="text-right">
-              Priority
-            </Label>
-            <Select value={priority} onValueChange={(v) => setPriority(v as TaskPriority)}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="deadline" className="text-right">

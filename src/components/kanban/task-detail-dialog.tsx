@@ -13,6 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  SheetClose,
 } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -103,14 +104,6 @@ export function TaskDetailDialog({
 }: TaskDetailSheetProps) {
   const [commentText, setCommentText] = React.useState("");
 
-  const assignees = React.useMemo(() => {
-    if (!task?.assigneeIds) return [];
-    return task.assigneeIds.map(id => users.find(user => user.id === id)).filter(Boolean) as User[];
-  }, [task?.assigneeIds]);
-  
-  const project = task ? projects.find((p) => p.id === task.projectId) : null;
-  const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
-
   const handleEdit = () => {
     onOpenChange(false);
     onEdit();
@@ -130,9 +123,21 @@ export function TaskDetailDialog({
     }
   };
 
+  const assignees = React.useMemo(() => {
+    if (!task?.assigneeIds) return [];
+    return task.assigneeIds.map(id => users.find(user => user.id === id)).filter(Boolean) as User[];
+  }, [task?.assigneeIds]);
+  
+  const project = React.useMemo(() => {
+    if (!task) return null;
+    return projects.find((p) => p.id === task.projectId);
+  }, [task, projects]);
+
+  const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
+
   const sortedActivity = React.useMemo(() => {
     if (!task?.activity) return [];
-    return task.activity.slice().sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return [...task.activity].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }, [task?.activity]);
   
   const taskTags = React.useMemo(() => {
@@ -175,6 +180,7 @@ export function TaskDetailDialog({
                             </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        <SheetClose />
                     </div>
                 </div>
             </SheetHeader>
@@ -255,7 +261,6 @@ export function TaskDetailDialog({
                             <div className="space-y-6">
                               {sortedActivity.map(activity => {
                                 const activityUser = users.find(u => u.id === activity.userId);
-                                const ActivityIcon = activityIconMap[activity.activityType] || Clock;
                                 return (
                                   <div key={activity.id} className="flex items-start gap-4">
                                     <Avatar className="h-8 w-8 mt-1">
