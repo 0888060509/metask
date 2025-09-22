@@ -12,11 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   LogOut,
-  Plus,
-  Search,
   Settings,
   User,
 } from "lucide-react";
@@ -24,20 +21,10 @@ import { SidebarTrigger } from "./ui/sidebar";
 
 type AppHeaderProps = {
   title: string;
-  onNewTaskClick?: () => void;
-  searchQuery?: string;
-  setSearchQuery?: (query: string) => void;
-  showSearch?: boolean;
-  showCreateTask?: boolean;
 };
 
 export function AppHeader({ 
   title,
-  onNewTaskClick, 
-  searchQuery, 
-  setSearchQuery,
-  showSearch = false,
-  showCreateTask = false,
 }: AppHeaderProps) {
   return (
     <>
@@ -48,23 +35,6 @@ export function AppHeader({
               <h1 className="font-headline text-2xl font-bold">{title}</h1>
           </div>
           <div className="flex flex-1 items-center justify-end gap-2">
-            {showSearch && setSearchQuery && (
-              <div className="relative w-full max-w-md">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search tasks..." 
-                  className="pl-8" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            )}
-            {showCreateTask && onNewTaskClick && (
-              <Button onClick={onNewTaskClick} className="ml-auto">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Task
-              </Button>
-            )}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">

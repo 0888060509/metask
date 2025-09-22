@@ -7,7 +7,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { TaskDetailDialog } from "@/components/kanban/task-detail-dialog";
-import { TaskFilters } from "@/components/kanban/task-filters";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +21,7 @@ import { ProjectDialog } from "@/components/project/project-dialog";
 import { tasks as initialTasks, projects as initialProjects, tags as initialTags } from "@/lib/data";
 import type { Task, TaskPriority, Project, Comment, Tag } from "@/lib/types";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
 
 export type Filters = {
   projects: string[];
@@ -180,19 +180,21 @@ export default function Home() {
         <div className="flex h-full flex-col">
           <AppHeader 
             title="All Tasks"
-            onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
+          />
+          <KanbanToolbar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            showCreateTask
-            showSearch
+            filters={filters}
+            setFilters={setFilters}
+            projects={projects}
           />
-          <TaskFilters filters={filters} setFilters={setFilters} projects={projects} />
           <div className="flex-1 overflow-y-auto p-4 md:p-6">
             <KanbanBoard 
               tasks={filteredTasks} 
               setTasks={setTasks} 
               onTaskClick={handleOpenTask}
               projects={projects}
+              onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
             />
           </div>
           <TaskDialog
