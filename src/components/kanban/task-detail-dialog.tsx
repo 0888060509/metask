@@ -133,7 +133,7 @@ const CommentItem = ({
     const [isReplying, setIsReplying] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [replyText, setReplyText] = React.useState("");
-    const [editText, setEditText] = React.useStatre(comment.text);
+    const [editText, setEditText] = React.useState(comment.text);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
 
     const handleReply = () => {
@@ -181,10 +181,16 @@ const CommentItem = ({
                                 <Smile className="h-4 w-4 mr-1"/> Add reaction
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-1">
+                        <PopoverContent className="w-auto p-2 border-0 shadow-xl">
                             <div className="flex gap-1">
                                 {availableReactions.map(emoji => (
-                                    <Button key={emoji} variant={userHasReacted(emoji) ? "outline" : "ghost"} size="icon" className={cn("h-8 w-8 text-lg", userHasReacted(emoji) && "border-primary bg-primary/10")}>
+                                    <Button 
+                                        key={emoji} 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className={cn("h-8 w-8 text-lg rounded-full", userHasReacted(emoji) && "bg-primary/10")}
+                                        onClick={() => onAddReaction(comment.id, emoji)}
+                                    >
                                         {emoji}
                                     </Button>
                                 ))}
@@ -778,5 +784,7 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
+
+    
 
     
