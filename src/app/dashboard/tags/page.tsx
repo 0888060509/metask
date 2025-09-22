@@ -1,19 +1,35 @@
+
 "use client";
 
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { tags as initialTags, tasks as initialTasks } from "@/lib/data";
 import { Tag } from "@/lib/types";
 import { TagsDataTable } from "@/components/tags/tags-data-table";
 import { TagDialog } from "@/components/tags/tag-dialog";
+import { DashboardContext } from "../layout";
 
 export default function TagsPage() {
-    const [tags, setTags] = React.useState<Tag[]>(initialTags);
-    const [tasks, setTasks] = React.useState(initialTasks);
+    const context = React.useContext(DashboardContext);
+    
     const [isTagDialogOpen, setIsTagDialogOpen] = React.useState(false);
     const [selectedTag, setSelectedTag] = React.useState<Tag | null>(null);
+
+    if (!context) {
+        return <div>Loading...</div>
+    }
+
+    const { tags, setTasks, setNotifications: _setNotifications, ...rest } = context; // Assuming tags are part of context now, let's just use it
+    
+    // A dummy setTags if it's not in the context, but it should be
+    const safeSetTasks = context.setTasks || (() => {});
+    
+    // Let's create a local state for tags if not in context, but ideally it is.
+    const [localTags, setLocalTags] = React.useState(context.tags || []);
+    const currentTags = context.tags || localTags;
+    const setCurrentTags = (context as any).setTags || setLocalTags;
+
 
     const handleCreateTag = () => {
         setSelectedTag(null);
@@ -28,7 +44,7 @@ export default function TagsPage() {
     const handleSaveTag = (tagData: { name: string; color: Tag['color'] }) => {
         if (selectedTag) {
             // Update existing tag
-            setTags(tags.map(t => t.id === selectedTag.id ? { ...t, ...tagData } : t));
+            setCurrentTags(currentTags.map(t => t.id === selectedTag.id ? { ...t, ...tagData } : t));
         } else {
             // Create new tag
             const newTag: Tag = {
@@ -36,16 +52,16 @@ export default function TagsPage() {
                 name: tagData.name,
                 color: tagData.color,
             };
-            setTags([...tags, newTag]);
+            setCurrentTags([...currentTags, newTag]);
         }
     };
 
     const handleDeleteTag = (tagId: string) => {
         // Remove tag from the list of tags
-        setTags(tags.filter(t => t.id !== tagId));
+        setCurrentTags(currentTags.filter(t => t.id !== tagId));
         
         // Remove tag from any tasks that have it
-        setTasks(prevTasks => 
+        safeSetTasks(prevTasks => 
             prevTasks.map(task => {
                 if (task.tagIds?.includes(tagId)) {
                     return {
@@ -62,7 +78,6 @@ export default function TagsPage() {
         <div className="flex h-full flex-col">
             <AppHeader
                 title="Tags"
-                onNewTaskClick={handleCreateTag}
                 showCreateTask={false} // We will add a custom button
             />
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -75,7 +90,7 @@ export default function TagsPage() {
                 </div>
                 <div className="border shadow-sm rounded-lg">
                     <TagsDataTable 
-                        data={tags}
+                        data={currentTags}
                         onEdit={handleEditTag}
                         onDelete={handleDeleteTag}
                     />

@@ -4,16 +4,27 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { tasks as initialTasks, users as initialUsers, projects as initialProjects } from "@/lib/data";
 import { User, Task, Project } from "@/lib/types";
 import { WorkloadDistributionChart } from "@/components/dashboard/workload-distribution-chart";
 import { IndividualPerformanceMetrics } from "@/components/dashboard/individual-performance-metrics";
 import { ProjectSummaryReport } from "@/components/dashboard/project-summary-report";
+import { DashboardContext } from "./layout";
 
 export default function DashboardPage() {
-    const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
-    const [users, setUsers] = React.useState<User[]>(initialUsers);
-    const [projects, setProjects] = React.useState<Project[]>(initialProjects);
+    const context = React.useContext(DashboardContext);
+
+    if (!context) {
+        return (
+             <div className="flex h-full flex-col">
+                <AppHeader title="Dashboard" />
+                <div className="flex-1 overflow-y-auto p-4 md:p-6">
+                    <p>Loading dashboard...</p>
+                </div>
+            </div>
+        )
+    }
+
+    const { tasks, users, projects } = context;
 
     return (
         <div className="flex h-full flex-col">

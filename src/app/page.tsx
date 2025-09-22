@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -18,7 +17,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { projects as initialProjects, notifications as initialNotifications, users } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
@@ -33,8 +31,6 @@ export type Filters = {
 export default function Home() {
   const context = React.useContext(DashboardContext);
   
-  const [projects, setProjects] = React.useState<Project[]>(initialProjects);
-
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
@@ -49,13 +45,37 @@ export default function Home() {
     priorities: [],
   });
   
-  if (!context) return null;
-  const { tasks, setTasks, openTask, tags } = context;
+  if (!context) {
+    // You might want to render a loading state here
+    return (
+        <SidebarProvider>
+            <AppSidebar
+                projects={[]}
+                onNewProjectClick={() => {}}
+                onEditProject={() => {}}
+                onDeleteProject={() => {}}
+                unreadNotificationCount={0}
+            />
+            <SidebarInset>
+                <div className="flex h-full flex-col items-center justify-center">
+                   <p>Loading...</p>
+                </div>
+            </SidebarInset>
+        </SidebarProvider>
+    );
+  }
+  const { tasks, setTasks, projects, setProjects: setContextProjects, tags, notifications, openTask } = context;
+
+  // Let's assume setProjects will be part of the context or passed down somehow
+  // For now, let's create a local state managed here.
+  const [localProjects, setLocalProjects] = React.useState<Project[]>(projects);
+  const setProjects = (setContextProjects as any) || setLocalProjects;
+
 
   // This would be the ID of the currently logged-in user.
   const currentUserId = "user-1";
 
-  const unreadCount = context.notifications.filter(n => n.userId === "user-4" && !n.isRead).length ?? 0;
+  const unreadCount = notifications.filter(n => n.userId === "user-4" && !n.isRead).length ?? 0;
 
   // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
@@ -132,64 +152,53 @@ export default function Home() {
   }, [tasks, filters, searchQuery]);
 
   return (
-    <SidebarProvider>
-      <AppSidebar
-        projects={projects}
-        onNewProjectClick={handleCreateProject}
-        onEditProject={handleEditProject}
-        onDeleteProject={confirmDeleteProject}
-        unreadNotificationCount={unreadCount}
+    <div className="flex h-full flex-col">
+      <AppHeader 
+        title="All Tasks"
       />
-      <SidebarInset>
-        <div className="flex h-full flex-col">
-          <AppHeader 
-            title="All Tasks"
-          />
-          <KanbanToolbar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            filters={filters}
-            setFilters={setFilters}
-            projects={projects}
-          />
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
-            <KanbanBoard 
-              tasks={filteredTasks} 
-              setTasks={setTasks} 
-              onTaskClick={openTask}
-              projects={projects}
-              onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
-            />
-          </div>
-          <TaskDialog
-            open={isNewTaskDialogOpen}
-            onOpenChange={setIsNewTaskDialogOpen}
-            onSave={handleCreateTask}
-            projects={projects}
-            tags={tags}
-          />
-          <ProjectDialog 
-            open={isProjectDialogOpen}
-            onOpenChange={setIsProjectDialogOpen}
-            onSave={handleSaveProject}
-            project={selectedProject}
-          />
-           <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete the "{projectToDelete?.name}" project and all its tasks. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+      <KanbanToolbar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filters={filters}
+        setFilters={setFilters}
+        projects={projects}
+      />
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <KanbanBoard 
+          tasks={filteredTasks} 
+          setTasks={setTasks} 
+          onTaskClick={openTask}
+          projects={projects}
+          onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
+        />
+      </div>
+      <TaskDialog
+        open={isNewTaskDialogOpen}
+        onOpenChange={setIsNewTaskDialogOpen}
+        onSave={handleCreateTask}
+        projects={projects}
+        tags={tags}
+      />
+      <ProjectDialog 
+        open={isProjectDialogOpen}
+        onOpenChange={setIsProjectDialogOpen}
+        onSave={handleSaveProject}
+        project={selectedProject}
+      />
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the "{projectToDelete?.name}" project and all its tasks. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

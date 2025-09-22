@@ -1,12 +1,11 @@
 
-
 "use client";
 
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { tasks, users } from "@/lib/data";
+import { users } from "@/lib/data";
 import { Notification, Task, User } from "@/lib/types";
 import { isToday, isYesterday } from "date-fns";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -21,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 
 type NotificationItemProps = {
   notification: Notification;
-  onNotificationClick: (task: Task) => void;
+  onNotificationClick: (task: Task | undefined) => void;
   onMarkAsRead: (notificationId: string) => void;
 };
 
@@ -60,6 +59,7 @@ const getNotificationText = (notification: Notification, actor?: User, task?: Ta
 }
 
 const getNotificationContext = (notification: Notification, task?: Task) => {
+    if (!task) return null;
     if (notification.type === 'mention' || notification.type === 'new_comment' || notification.type === 'comment') {
         const commentId = notification.details?.commentId;
         if (!commentId || !task?.comments) return null;
@@ -77,8 +77,9 @@ const getNotificationContext = (notification: Notification, task?: Task) => {
 }
 
 function NotificationItem({ notification, onNotificationClick, onMarkAsRead }: NotificationItemProps) {
-  const actor = users.find((u) => u.id === notification.actorId);
-  const task = tasks.find((t) => t.id === notification.taskId);
+  const context = React.useContext(DashboardContext);
+  const actor = context?.users.find((u) => u.id === notification.actorId);
+  const task = context?.tasks.find((t) => t.id === notification.taskId);
   const Icon = notificationIcons[notification.type];
   const [isClient, setIsClient] = React.useState(false);
 
@@ -120,7 +121,7 @@ function NotificationItem({ notification, onNotificationClick, onMarkAsRead }: N
 
       <div
         className={cn("flex-1 flex items-start gap-4 pl-4 cursor-pointer", notification.isRead && "opacity-60 hover:opacity-100 transition-opacity")}
-        onClick={() => notification.taskId && task && onNotificationClick(task)}
+        onClick={() => onNotificationClick(task)}
       >
         <div className="relative h-10 w-10 shrink-0">
              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-muted">
@@ -156,7 +157,7 @@ export default function NotificationsPage() {
     if (!context) {
         return <div>Loading...</div>;
     }
-    const { notifications, setNotifications, openTask } = context;
+    const { notifications, setNotifications, openTask, tasks } = context;
 
     const currentUserId = "user-4";
 
@@ -203,6 +204,12 @@ export default function NotificationsPage() {
         setNotifications((prev: Notification[]) => prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n));
     };
 
+    const handleNotificationClick = (task: Task | undefined) => {
+        if (task) {
+            openTask(task);
+        }
+    }
+
     return (
         <div className="flex h-full flex-col">
             <AppHeader title="Notifications" />
@@ -246,7 +253,7 @@ export default function NotificationsPage() {
                                             notification={notification}
                                             onNotificationClick={(task) => {
                                                 handleMarkAsRead(notification.id);
-                                                openTask(task);
+                                                handleNotificationClick(task);
                                             }}
                                             onMarkAsRead={handleMarkAsRead}
                                         />
