@@ -98,7 +98,7 @@ function DetailRow({
         <Icon className="h-4 w-4" />
         <span>{label}</span>
       </div>
-      <div className={cn("col-span-2 text-sm", isEditing ? "px-0" : "pt-2")}>{children}</div>
+      <div className={cn("col-span-2 text-sm", isEditing ? "" : "pt-2")}>{children}</div>
     </div>
   );
 }
@@ -188,7 +188,7 @@ export function TaskDetailDialog({
 
   return (
     <Sheet open={!!task} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right" hideCloseButton>
+      <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right">
         {!task || !currentTask ? (
           <div className="flex items-center justify-center h-full">
             <p>Loading task...</p>
@@ -398,7 +398,7 @@ export function TaskDetailDialog({
                                     placeholder="Select a project"
                                     searchPlaceholder="Search projects..."
                                     emptyResult="No projects found."
-                                    className="bg-background"
+                                    className="bg-background h-8"
                                 />
                               ) : project ? (
                                 <div className="flex items-center gap-2">
@@ -413,7 +413,7 @@ export function TaskDetailDialog({
                                  <DatePicker
                                     date={currentTask.deadline}
                                     setDate={(d) => handleFieldChange('deadline', d)}
-                                    className="bg-background"
+                                    className="bg-background h-8"
                                  />
                              ) : (
                                 currentTask.deadline ? format(currentTask.deadline, "PPP") : 'No deadline'
@@ -478,7 +478,3 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
-
-    
-
-    
