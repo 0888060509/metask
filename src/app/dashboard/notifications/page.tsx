@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -10,6 +11,7 @@ import { Notification, Task, User } from "@/lib/types";
 import { format, formatDistanceToNowStrict, isToday, isYesterday } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MessageSquare, UserPlus, CheckCircle } from "lucide-react";
+import { DashboardContext } from "../layout";
 
 type NotificationItemProps = {
   notification: Notification;
@@ -78,8 +80,16 @@ type GroupedNotifications = {
     [key: string]: Notification[];
 }
 
-export default function NotificationsPage({ handleOpenTaskFromNotification, notifications, setNotifications }: any) {
-    
+export default function NotificationsPage() {
+    const context = React.useContext(DashboardContext);
+
+    if (!context) {
+        // This can happen if the page is rendered outside the layout with the context provider.
+        // You might want to show a loading state or an error message.
+        return <div>Loading...</div>;
+    }
+    const { notifications, setNotifications, handleOpenTaskFromNotification } = context;
+
     // This would be the ID of the currently logged-in user.
     const currentUserId = "user-4";
 

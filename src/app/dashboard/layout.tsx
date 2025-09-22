@@ -1,3 +1,4 @@
+
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
@@ -6,6 +7,12 @@ import { tasks as initialTasks, projects as initialProjects, tags as initialTags
 import { Project, Tag, Task, Notification } from "@/lib/types";
 import React from "react";
 import { TaskDetailDialog } from "@/components/kanban/task-detail-dialog";
+
+export const DashboardContext = React.createContext<{
+    notifications: Notification[];
+    setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
+    handleOpenTaskFromNotification: (taskId: string) => void;
+} | null>(null);
 
 
 export default function DashboardLayout({
@@ -37,35 +44,39 @@ export default function DashboardLayout({
         setNotifications(prev => prev.map(n => n.taskId === taskId ? { ...n, isRead: true } : n));
     };
 
+    const contextValue = {
+        notifications,
+        setNotifications,
+        handleOpenTaskFromNotification,
+    };
+
     return (
-        <SidebarProvider>
-            <AppSidebar
-                projects={projects}
-                onNewProjectClick={handleCreateProject}
-                onEditProject={handleEditProject}
-                onDeleteProject={handleDeleteProject}
-                unreadNotificationCount={unreadCount}
-            />
-            <SidebarInset>
-                {React.cloneElement(children as React.ReactElement, { 
-                    handleOpenTaskFromNotification,
-                    notifications,
-                    setNotifications
-                })}
-            </SidebarInset>
-             <TaskDetailDialog 
-                task={selectedTask}
-                projects={projects}
-                tags={tags}
-                onOpenChange={(isOpen) => {
-                    if (!isOpen) {
-                        setSelectedTask(null);
-                    }
-                }}
-                onUpdate={() => {}}
-                onDelete={() => {}}
-                onComment={() => {}}
-            />
-        </SidebarProvider>
+        <DashboardContext.Provider value={contextValue}>
+            <SidebarProvider>
+                <AppSidebar
+                    projects={projects}
+                    onNewProjectClick={handleCreateProject}
+                    onEditProject={handleEditProject}
+                    onDeleteProject={handleDeleteProject}
+                    unreadNotificationCount={unreadCount}
+                />
+                <SidebarInset>
+                    {children}
+                </SidebarInset>
+                <TaskDetailDialog 
+                    task={selectedTask}
+                    projects={projects}
+                    tags={tags}
+                    onOpenChange={(isOpen) => {
+                        if (!isOpen) {
+                            setSelectedTask(null);
+                        }
+                    }}
+                    onUpdate={() => {}}
+                    onDelete={() => {}}
+                    onComment={() => {}}
+                />
+            </SidebarProvider>
+        </DashboardContext.Provider>
     );
 }
