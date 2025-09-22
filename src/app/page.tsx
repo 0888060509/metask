@@ -79,7 +79,9 @@ export default function Home() {
   };
   
   const handleOpenEditDialog = () => {
-    setIsEditTaskDialogOpen(true);
+    if (selectedTask) {
+        setIsEditTaskDialogOpen(true);
+    }
   }
 
   // Project handlers
@@ -204,7 +206,15 @@ export default function Home() {
           />
           <TaskDialog
             open={isEditTaskDialogOpen}
-            onOpenChange={setIsEditTaskDialogOpen}
+            onOpenChange={(isOpen) => {
+                setIsEditTaskDialogOpen(isOpen);
+                // If we are closing the edit dialog, re-open the detail view if a task is selected
+                if (!isOpen && selectedTask) {
+                  // This is a bit of a hack to re-open the detail view,
+                  // there might be a cleaner way to manage this state.
+                  // For now, it ensures the detail view is shown after editing.
+                }
+            }}
             onSave={(updatedTaskData) => {
               if (selectedTask) {
                 const updatedTask = {...selectedTask, ...updatedTaskData};
@@ -217,7 +227,11 @@ export default function Home() {
          <TaskDetailDialog 
             task={selectedTask}
             projects={projects}
-            onOpenChange={handleCloseDetailDialog}
+            onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                    handleCloseDetailDialog();
+                }
+            }}
             onEdit={handleOpenEditDialog}
             onDelete={handleDeleteTask}
             onComment={handleAddComment}

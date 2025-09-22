@@ -132,9 +132,7 @@ export function TaskDetailDialog({
     if (!task) return null;
     return projects.find((p) => p.id === task.projectId);
   }, [task, projects]);
-
-  const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
-
+  
   const sortedActivity = React.useMemo(() => {
     if (!task?.activity) return [];
     return [...task.activity].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -145,6 +143,7 @@ export function TaskDetailDialog({
     return task.tagIds.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as Tag[];
   }, [task?.tagIds]);
 
+  const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
 
   return (
     <Sheet open={!!task} onOpenChange={onOpenChange}>
@@ -209,6 +208,21 @@ export function TaskDetailDialog({
                               </span>
                           </DetailRow>
 
+                          {project && (
+                              <DetailRow icon={Folder} label="Project">
+                              <div className="flex items-center gap-2">
+                                  <ProjectIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span>{project.name}</span>
+                              </div>
+                              </DetailRow>
+                          )}
+
+                          {task.deadline && (
+                              <DetailRow icon={Calendar} label="Deadline">
+                              {format(task.deadline, "PPP")}
+                              </DetailRow>
+                          )}
+
                           {assignees && assignees.length > 0 && (
                               <DetailRow icon={UserIcon} label="Assignees">
                                 <div className="flex flex-col gap-2">
@@ -224,21 +238,6 @@ export function TaskDetailDialog({
                                     </div>
                                   ))}
                                 </div>
-                              </DetailRow>
-                          )}
-
-                          {project && (
-                              <DetailRow icon={Folder} label="Project">
-                              <div className="flex items-center gap-2">
-                                  <ProjectIcon className="h-4 w-4 text-muted-foreground" />
-                                  <span>{project.name}</span>
-                              </div>
-                              </DetailRow>
-                          )}
-
-                          {task.deadline && (
-                              <DetailRow icon={Calendar} label="Deadline">
-                              {format(task.deadline, "PPP")}
                               </DetailRow>
                           )}
 
