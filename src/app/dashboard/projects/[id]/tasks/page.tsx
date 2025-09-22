@@ -9,7 +9,7 @@ import { AppHeader } from "@/components/app-header";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
-import { projects, tasks as allTasks } from "@/lib/data";
+import { projects, tasks } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardContext } from "../../../layout";
@@ -131,7 +131,7 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
     if (!project) {
         notFound();
     }
-    const projectTasks = allTasks.filter(t => t.projectId === params.id);
+    const projectTasks = tasks.filter(t => t.projectId === params.id);
   
     return <ProjectTasksClient project={project} projectTasks={projectTasks} />;
 }
