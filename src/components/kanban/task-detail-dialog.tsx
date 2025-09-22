@@ -197,7 +197,8 @@ export function TaskDetailDialog({
           <>
             <SheetHeader className="p-6 border-b">
                 <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                         <ProjectIcon className="h-6 w-6 text-muted-foreground" />
                         {isEditing ? (
                                 <Input 
                                 id="title" 
@@ -264,7 +265,7 @@ export function TaskDetailDialog({
                             className="text-sm text-muted-foreground p-0 border-0 shadow-none focus-visible:ring-0 min-h-[100px]"
                         />
                     ) : (
-                        task.description && <SheetDescription className="pt-1 break-words whitespace-pre-wrap">{task.description}</SheetDescription>
+                        task.description ? <SheetDescription className="pt-1 break-words whitespace-pre-wrap">{task.description}</SheetDescription> : <p className="pt-1 text-sm text-muted-foreground italic">No description provided.</p>
                     )}
 
                     <Separator/>
