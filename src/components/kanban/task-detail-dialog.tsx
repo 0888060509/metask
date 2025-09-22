@@ -105,10 +105,8 @@ export function TaskDetailDialog({
 }: TaskDetailSheetProps) {
   const [commentText, setCommentText] = React.useState("");
 
-  if (!task) return null;
-
-  const assignee = users.find((user) => user.id === task.assigneeId);
-  const project = projects.find((p) => p.id === task.projectId);
+  const assignee = task ? users.find((user) => user.id === task.assigneeId) : null;
+  const project = task ? projects.find((p) => p.id === task.projectId) : null;
   const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
 
   const handleEdit = () => {
@@ -117,198 +115,209 @@ export function TaskDetailDialog({
   };
   
   const handleDelete = () => {
-    onOpenChange(false);
-    onDelete(task.id);
+    if (task) {
+      onOpenChange(false);
+      onDelete(task.id);
+    }
   }
 
   const handleSendComment = () => {
-    if (commentText.trim()) {
+    if (task && commentText.trim()) {
       onComment(task.id, commentText);
       setCommentText("");
     }
   };
 
   const sortedActivity = React.useMemo(() => {
-    return task.activity?.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  }, [task.activity]);
+    return task?.activity?.slice().sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }, [task?.activity]);
+
 
   return (
     <Sheet open={!!task} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right">
-        <SheetHeader className="p-6">
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 space-y-1">
-                    <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
-                    {task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>}
+        {!task ? (
+          <div className="flex items-center justify-center h-full">
+            <p>Loading task...</p>
+          </div>
+        ) : (
+          <>
+            <SheetHeader className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-1">
+                        <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
+                        {task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                                <MoreVertical className="h-5 w-5" />
+                                <span className="sr-only">More actions</span>
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={handleEdit}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                <span>Edit</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Delete</span>
+                            </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                            <MoreVertical className="h-5 w-5" />
-                            <span className="sr-only">More actions</span>
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={handleEdit}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                        </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </div>
-        </SheetHeader>
-        
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6 pt-0">
-            {/* Left Column: Tabs for Details and Activity */}
-            <div className="md:col-span-2 space-y-6">
-              <Tabs defaultValue="details">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="activity">Activity</TabsTrigger>
-                </TabsList>
-                <TabsContent value="details">
-                  <div className="space-y-4 rounded-lg border p-4 mt-4">
-                      <DetailRow icon={CheckCircle} label="Status">
-                          <Badge className={cn("text-white", statusClasses[task.status])}>
-                          {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-                          </Badge>
-                      </DetailRow>
-
-                      <DetailRow icon={Flag} label="Priority">
-                          <span
-                          className={cn("font-medium", priorityClasses[task.priority])}
-                          >
-                          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                          </span>
-                      </DetailRow>
-
-                      {assignee && (
-                          <DetailRow icon={User} label="Assignee">
-                          <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                              <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
-                              <AvatarFallback>
-                                  {assignee.name.charAt(0)}
-                              </AvatarFallback>
-                              </Avatar>
-                              <span>{assignee.name}</span>
-                          </div>
-                          </DetailRow>
-                      )}
-
-                      {project && (
-                          <DetailRow icon={Folder} label="Project">
-                          <div className="flex items-center gap-2">
-                              <ProjectIcon className="h-4 w-4 text-muted-foreground" />
-                              <span>{project.name}</span>
-                          </div>
-                          </DetailRow>
-                      )}
-
-                      {task.deadline && (
-                          <DetailRow icon={Calendar} label="Deadline">
-                          {format(task.deadline, "PPP")}
-                          </DetailRow>
-                      )}
-
-                      {task.tags && task.tags.length > 0 && (
-                          <DetailRow icon={Tag} label="Tags">
-                          <div className="flex flex-wrap gap-2">
-                              {task.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary">
-                                  {tag}
+            </SheetHeader>
+            
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6 pt-0">
+                {/* Left Column: Tabs for Details and Activity */}
+                <div className="md:col-span-2 space-y-6">
+                  <Tabs defaultValue="details">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="details">Details</TabsTrigger>
+                      <TabsTrigger value="activity">Activity</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="details">
+                      <div className="space-y-4 rounded-lg border p-4 mt-4">
+                          <DetailRow icon={CheckCircle} label="Status">
+                              <Badge className={cn("text-white", statusClasses[task.status])}>
+                              {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                               </Badge>
-                              ))}
-                          </div>
                           </DetailRow>
-                      )}
-                  </div>
-                </TabsContent>
-                <TabsContent value="activity">
-                  <div className="space-y-4 mt-4 border rounded-lg p-4">
-                      {sortedActivity && sortedActivity.length > 0 ? (
-                        <div className="space-y-6">
-                          {sortedActivity.map(activity => {
-                            const activityUser = users.find(u => u.id === activity.userId);
-                            const ActivityIcon = activityIconMap[activity.activityType] || Clock;
-                            return (
-                              <div key={activity.id} className="flex items-start gap-4">
-                                <Avatar className="h-8 w-8 mt-1">
-                                    <AvatarImage src={activityUser?.avatarUrl} data-ai-hint="person portrait" />
-                                    <AvatarFallback>{activityUser?.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 text-sm">
-                                  <p className="break-words">{activity.details}</p>
-                                  <p className="text-xs text-muted-foreground mt-0.5">
-                                    {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
-                                  </p>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border-dashed">
-                            <Clock className="h-10 w-10 text-muted-foreground/30" />
-                            <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
-                        </div>
-                      )}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
 
-            {/* Right Column: Comments */}
-            <div className="md:col-span-1 space-y-6 flex flex-col">
-                <h3 className="font-semibold text-lg flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" /> Comments</h3>
-                <div className="flex-1 space-y-4 pr-2 -mr-2 overflow-y-auto">
-                    {task.comments && task.comments.length > 0 ? (
-                        task.comments.map((comment) => {
-                            const commentUser = users.find(u => u.id === comment.userId);
-                            return (
-                            <div key={comment.id} className="flex items-start gap-3">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage src={commentUser?.avatarUrl} data-ai-hint="person portrait"/>
-                                    <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold text-sm">{commentUser?.name}</p>
-                                        <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
+                          <DetailRow icon={Flag} label="Priority">
+                              <span
+                              className={cn("font-medium", priorityClasses[task.priority])}
+                              >
+                              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                              </span>
+                          </DetailRow>
+
+                          {assignee && (
+                              <DetailRow icon={User} label="Assignee">
+                              <div className="flex items-center gap-2">
+                                  <Avatar className="h-6 w-6">
+                                  <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
+                                  <AvatarFallback>
+                                      {assignee.name.charAt(0)}
+                                  </AvatarFallback>
+                                  </Avatar>
+                                  <span>{assignee.name}</span>
+                              </div>
+                              </DetailRow>
+                          )}
+
+                          {project && (
+                              <DetailRow icon={Folder} label="Project">
+                              <div className="flex items-center gap-2">
+                                  <ProjectIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span>{project.name}</span>
+                              </div>
+                              </DetailRow>
+                          )}
+
+                          {task.deadline && (
+                              <DetailRow icon={Calendar} label="Deadline">
+                              {format(task.deadline, "PPP")}
+                              </DetailRow>
+                          )}
+
+                          {task.tags && task.tags.length > 0 && (
+                              <DetailRow icon={Tag} label="Tags">
+                              <div className="flex flex-wrap gap-2">
+                                  {task.tags.map((tag) => (
+                                  <Badge key={tag} variant="secondary">
+                                      {tag}
+                                  </Badge>
+                                  ))}
+                              </div>
+                              </DetailRow>
+                          )}
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="activity">
+                      <div className="space-y-4 mt-4 border rounded-lg p-4">
+                          {sortedActivity && sortedActivity.length > 0 ? (
+                            <div className="space-y-6">
+                              {sortedActivity.map(activity => {
+                                const activityUser = users.find(u => u.id === activity.userId);
+                                const ActivityIcon = activityIconMap[activity.activityType] || Clock;
+                                return (
+                                  <div key={activity.id} className="flex items-start gap-4">
+                                    <Avatar className="h-8 w-8 mt-1">
+                                        <AvatarImage src={activityUser?.avatarUrl} data-ai-hint="person portrait" />
+                                        <AvatarFallback>{activityUser?.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 text-sm">
+                                      <p className="break-words">{activity.details}</p>
+                                      <p className="text-xs text-muted-foreground mt-0.5">
+                                        {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                                      </p>
                                     </div>
-                                    <p className="text-sm bg-muted rounded-lg p-2 mt-1 break-words">{comment.text}</p>
-                                </div>
+                                  </div>
+                                )
+                              })}
                             </div>
-                            );
-                        })
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed h-full">
-                            <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
-                            <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
-                        </div>
-                    )}
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border-dashed">
+                                <Clock className="h-10 w-10 text-muted-foreground/30" />
+                                <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
+                            </div>
+                          )}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
-                <div className="relative mt-auto">
-                    <Textarea 
-                        placeholder="Add a comment..." 
-                        className="pr-12"
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
-                    />
-                    <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
-                        <Send className="h-4 w-4"/>
-                        <span className="sr-only">Send Comment</span>
-                    </Button>
+
+                {/* Right Column: Comments */}
+                <div className="md:col-span-1 space-y-6 flex flex-col">
+                    <h3 className="font-semibold text-lg flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" /> Comments</h3>
+                    <div className="flex-1 space-y-4 pr-2 -mr-2 overflow-y-auto">
+                        {task.comments && task.comments.length > 0 ? (
+                            task.comments.map((comment) => {
+                                const commentUser = users.find(u => u.id === comment.userId);
+                                return (
+                                <div key={comment.id} className="flex items-start gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={commentUser?.avatarUrl} data-ai-hint="person portrait"/>
+                                        <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold text-sm">{commentUser?.name}</p>
+                                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
+                                        </div>
+                                        <p className="text-sm bg-muted rounded-lg p-2 mt-1 break-words">{comment.text}</p>
+                                    </div>
+                                </div>
+                                );
+                            })
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed h-full">
+                                <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
+                                <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
+                            </div>
+                        )}
+                    </div>
+                    <div className="relative mt-auto">
+                        <Textarea 
+                            placeholder="Add a comment..." 
+                            className="pr-12"
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
+                        />
+                        <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
+                            <Send className="h-4 w-4"/>
+                            <span className="sr-only">Send Comment</span>
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
+          </>
+        )}
       </SheetContent>
     </Sheet>
   );
