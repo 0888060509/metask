@@ -9,6 +9,14 @@ export type Comment = {
   createdAt: Date;
 };
 
+export type Activity = {
+  id: string;
+  userId: string;
+  activityType: 'create' | 'update' | 'status_change' | 'comment';
+  timestamp: Date;
+  details: string;
+};
+
 export type Task = {
   id: string;
   title: string;
@@ -20,6 +28,7 @@ export type Task = {
   projectId: string;
   tags?: string[];
   comments?: Comment[];
+  activity?: Activity[];
 };
 
 export type User = {

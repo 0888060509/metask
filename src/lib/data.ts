@@ -28,7 +28,13 @@ export const tasks: Task[] = [
     comments: [
       { id: 'comment-1', taskId: 'task-1', userId: 'user-2', text: "How's this going?", createdAt: new Date(new Date().setDate(new Date().getDate() - 1)) },
       { id: 'comment-2', taskId: 'task-1', userId: 'user-1', text: "Almost done, will share soon.", createdAt: new Date() },
-    ]
+    ],
+    activity: [
+      { id: 'act-1', userId: 'user-2', activityType: 'comment', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)), details: 'Mike Johnson added a comment.' },
+      { id: 'act-2', userId: 'user-1', activityType: 'comment', timestamp: new Date(), details: 'Sarah Lee added a comment.' },
+      { id: 'act-3', userId: 'user-4', activityType: 'status_change', timestamp: new Date(new Date().setDate(new Date().getDate() - 2)), details: 'David Rodriguez changed status from To Do to In Progress.' },
+      { id: 'act-4', userId: 'user-4', activityType: 'create', timestamp: new Date(new Date().setDate(new Date().getDate() - 3)), details: 'David Rodriguez created the task.' },
+    ],
   },
   {
     id: "task-2",
@@ -41,6 +47,9 @@ export const tasks: Task[] = [
     projectId: "proj-2",
     tags: ["development", "auth"],
     comments: [],
+    activity: [
+        { id: 'act-5', userId: 'user-3', activityType: 'create', timestamp: new Date(new Date().setDate(new Date().getDate() - 4)), details: 'Emily Chen created the task.' },
+    ]
   },
   {
     id: "task-3",
@@ -53,6 +62,9 @@ export const tasks: Task[] = [
     projectId: "proj-3",
     tags: ["marketing", "content"],
     comments: [],
+    activity: [
+        { id: 'act-6', userId: 'user-2', activityType: 'create', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)), details: 'Mike Johnson created the task.' },
+    ]
   },
   {
     id: "task-4",
@@ -65,6 +77,10 @@ export const tasks: Task[] = [
     projectId: "proj-1",
     tags: ["design", "ui/ux"],
     comments: [],
+    activity: [
+        { id: 'act-7', userId: 'user-1', activityType: 'status_change', timestamp: new Date(new Date().setDate(new Date().getDate() - 2)), details: 'Sarah Lee changed status from In Progress to Done.' },
+        { id: 'act-8', userId: 'user-1', activityType: 'create', timestamp: new Date(new Date().setDate(new Date().getDate() - 6)), details: 'Sarah Lee created the task.' },
+    ]
   },
   {
     id: "task-5",
@@ -75,6 +91,9 @@ export const tasks: Task[] = [
     projectId: "proj-2",
     tags: ["devops", "development"],
     comments: [],
+    activity: [
+        { id: 'act-9', userId: 'user-3', activityType: 'create', timestamp: new Date(new Date().setDate(new Date().getDate() - 2)), details: 'Emily Chen created the task.' },
+    ]
   },
   {
     id: "task-6",
@@ -86,6 +105,7 @@ export const tasks: Task[] = [
     projectId: "proj-3",
     tags: ["marketing", "copywriting"],
     comments: [],
+    activity: []
   },
   {
     id: "task-7",
@@ -98,6 +118,7 @@ export const tasks: Task[] = [
     projectId: "proj-1",
     tags: ["research", "ux"],
     comments: [],
+    activity: []
   },
   {
     id: "task-8",
@@ -110,5 +131,6 @@ export const tasks: Task[] = [
     projectId: "proj-2",
     tags: ["bug", "mobile"],
     comments: [],
+    activity: []
   },
 ];

@@ -40,6 +40,9 @@ import {
   MessageSquare,
   Clock,
   Send,
+  PlusCircle,
+  ArrowRight,
+  MessageCircle,
 } from "lucide-react";
 import { iconMap } from "../project/icon-picker";
 
@@ -85,6 +88,13 @@ function DetailRow({
   );
 }
 
+const activityIconMap = {
+  create: PlusCircle,
+  update: Edit,
+  status_change: ArrowRight,
+  comment: MessageCircle,
+};
+
 export function TaskDetailDialog({
   task,
   projects,
@@ -117,6 +127,10 @@ export function TaskDetailDialog({
       setCommentText("");
     }
   };
+
+  const sortedActivity = React.useMemo(() => {
+    return task.activity?.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }, [task.activity]);
 
   return (
     <Sheet open={!!task} onOpenChange={onOpenChange}>
@@ -217,11 +231,34 @@ export function TaskDetailDialog({
                   </div>
                 </TabsContent>
                 <TabsContent value="activity">
-                  <div className="space-y-4 mt-4">
-                      <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
-                          <Clock className="h-10 w-10 text-muted-foreground/30" />
-                          <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
-                      </div>
+                  <div className="space-y-4 mt-4 border rounded-lg p-4">
+                      {sortedActivity && sortedActivity.length > 0 ? (
+                        <div className="space-y-6">
+                          {sortedActivity.map(activity => {
+                            const activityUser = users.find(u => u.id === activity.userId);
+                            const ActivityIcon = activityIconMap[activity.activityType] || Clock;
+                            return (
+                              <div key={activity.id} className="flex items-start gap-4">
+                                <Avatar className="h-8 w-8 mt-1">
+                                    <AvatarImage src={activityUser?.avatarUrl} data-ai-hint="person portrait" />
+                                    <AvatarFallback>{activityUser?.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 text-sm">
+                                  <p className="break-words">{activity.details}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                                  </p>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border-dashed">
+                            <Clock className="h-10 w-10 text-muted-foreground/30" />
+                            <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
+                        </div>
+                      )}
                   </div>
                 </TabsContent>
               </Tabs>
@@ -276,4 +313,3 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
-
