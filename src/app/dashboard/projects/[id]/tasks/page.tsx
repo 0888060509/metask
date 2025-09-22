@@ -64,6 +64,7 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
   const [filters, setFilters] = React.useState<Omit<Filters, 'projects'>>({
     assignees: [],
     priorities: [],
+    tags: [],
   });
 
   const project = projects.find(p => p.id === params.id);
@@ -144,7 +145,10 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
       const priorityMatch =
         filters.priorities.length === 0 ||
         filters.priorities.includes(task.priority);
-      return searchMatch && assigneeMatch && priorityMatch;
+      const tagMatch =
+        filters.tags.length === 0 ||
+        (task.tagIds && task.tagIds.some(id => filters.tags.includes(id)));
+      return searchMatch && assigneeMatch && priorityMatch && tagMatch;
     });
   }, [tasks, filters, searchQuery, params.id]);
 
