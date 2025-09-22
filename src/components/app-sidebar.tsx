@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
+  Tag,
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -60,6 +61,14 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
               <Link href="/dashboard">
                 <Home />
                 Dashboard
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/tags")}>
+              <Link href="/dashboard/tags">
+                <Tag />
+                Tags
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

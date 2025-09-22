@@ -19,8 +19,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { tasks as initialTasks, projects as initialProjects } from "@/lib/data";
-import type { Task, TaskPriority, Project, Comment } from "@/lib/types";
+import { tasks as initialTasks, projects as initialProjects, tags as initialTags } from "@/lib/data";
+import type { Task, TaskPriority, Project, Comment, Tag } from "@/lib/types";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export type Filters = {
@@ -32,6 +32,7 @@ export type Filters = {
 export default function Home() {
   const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
   const [projects, setProjects] = React.useState<Project[]>(initialProjects);
+  const [tags, setTags] = React.useState<Tag[]>(initialTags);
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = React.useState(false);
@@ -199,10 +200,12 @@ export default function Home() {
             onOpenChange={setIsNewTaskDialogOpen}
             onSave={handleCreateTask}
             projects={projects}
+            tags={tags}
           />
          <TaskDetailDialog 
             task={selectedTask}
             projects={projects}
+            tags={tags}
             onOpenChange={(isOpen) => {
                 if (!isOpen) {
                     handleCloseDetailDialog();

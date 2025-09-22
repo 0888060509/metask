@@ -3,7 +3,7 @@
 "use client";
 
 import React from "react";
-import { users, tags } from "@/lib/data";
+import { users } from "@/lib/data";
 import type { Task, TaskPriority, Project, Tag, User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +62,7 @@ import { DetailRow } from "../ui/detail-row";
 type TaskDetailSheetProps = {
   task: Task | null;
   projects: Project[];
+  tags: Tag[];
   onOpenChange: (open: boolean) => void;
   onUpdate: (task: Task) => void;
   onDelete: (taskId: string) => void;
@@ -84,6 +85,7 @@ const statusClasses = {
 export function TaskDetailDialog({
   task,
   projects,
+  tags,
   onOpenChange,
   onUpdate,
   onDelete,
@@ -95,7 +97,7 @@ export function TaskDetailDialog({
 
   const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
   const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
-  const tagOptions = React.useMemo(() => tags.map(tag => ({ value: tag.id, label: tag.name })), []);
+  const tagOptions = React.useMemo(() => tags.map(tag => ({ value: tag.id, label: tag.name })), [tags]);
   
   React.useEffect(() => {
     if (task) {
@@ -155,7 +157,7 @@ export function TaskDetailDialog({
   const taskTags = React.useMemo(() => {
     if (!currentTask?.tagIds) return [];
     return currentTask.tagIds.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as Tag[];
-  }, [currentTask?.tagIds]);
+  }, [currentTask?.tagIds, tags]);
 
   const sortedActivity = React.useMemo(() => {
     if (!task?.activity) return [];
@@ -456,7 +458,3 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
-
-    
-
-    
