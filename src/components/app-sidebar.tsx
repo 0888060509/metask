@@ -7,6 +7,7 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  LayoutGrid,
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -25,9 +26,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 import { Button } from "./ui/button";
+import { usePathname } from "next/navigation";
 
 export function AppSidebar() {
   const [isProjectsOpen, setIsProjectsOpen] = React.useState(true);
+  const pathname = usePathname();
 
   return (
     <Sidebar>
@@ -40,8 +43,8 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive>
-              <Link href="/">
+            <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
+              <Link href="/dashboard">
                 <Home />
                 Dashboard
               </Link>
@@ -70,6 +73,14 @@ export function AppSidebar() {
             </div>
             <CollapsibleContent>
               <SidebarMenu>
+                 <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname === "/"}>
+                        <Link href="/">
+                            <LayoutGrid />
+                            All Tasks
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
                 {projects.map((project) => (
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton asChild>

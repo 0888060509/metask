@@ -42,7 +42,7 @@ export function AppHeader({ onNewTaskClick, searchQuery, setSearchQuery }: AppHe
       <SidebarTrigger className="md:hidden" />
       <div className="flex w-full items-center justify-between">
         <div className="hidden md:block">
-            <h1 className="font-headline text-2xl font-bold">Tasks</h1>
+            <h1 className="font-headline text-2xl font-bold">All Tasks</h1>
         </div>
         <div className="relative flex-1 md:max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
