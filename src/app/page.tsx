@@ -19,7 +19,6 @@ import {
 import { ProjectDialog } from "@/components/project/project-dialog";
 import { tasks as initialTasks, projects as initialProjects } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
-import { FileText } from "lucide-react";
 
 export type Filters = {
   projects: string[];
@@ -90,7 +89,7 @@ export default function Home() {
     setIsProjectDialogOpen(true);
   };
   
-  const handleSaveProject = (projectData: { name: string }) => {
+  const handleSaveProject = (projectData: { name: string; icon: string }) => {
     if (selectedProject) {
       // Update existing project
       setProjects(projects.map(p => p.id === selectedProject.id ? { ...p, ...projectData } : p));
@@ -99,7 +98,7 @@ export default function Home() {
       const newProject: Project = {
         id: `proj-${Date.now()}`,
         name: projectData.name,
-        icon: FileText,
+        icon: projectData.icon,
       };
       setProjects([...projects, newProject]);
     }

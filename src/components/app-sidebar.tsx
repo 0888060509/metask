@@ -31,6 +31,8 @@ import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
 import type { Project } from "@/lib/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { iconMap } from "./project/icon-picker";
+
 
 type AppSidebarProps = {
     projects: Project[];
@@ -98,12 +100,14 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                {projects.map((project) => (
+                {projects.map((project) => {
+                  const Icon = iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText;
+                  return (
                   <SidebarMenuItem key={project.id}>
                     <div className="flex items-center w-full">
                         <SidebarMenuButton asChild className="flex-1">
                             <Link href="#">
-                                <project.icon />
+                                <Icon />
                                 {project.name}
                             </Link>
                         </SidebarMenuButton>
@@ -126,7 +130,7 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
                         </DropdownMenu>
                     </div>
                   </SidebarMenuItem>
-                ))}
+                )})}
               </SidebarMenu>
             </CollapsibleContent>
           </Collapsible>

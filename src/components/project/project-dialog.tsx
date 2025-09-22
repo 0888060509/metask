@@ -13,20 +13,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Project } from "@/lib/types";
+import { IconPicker, iconNames } from "./icon-picker";
 
 type ProjectDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   project?: Project | null;
-  onSave: (project: { name: string }) => void;
+  onSave: (project: { name: string, icon: string }) => void;
 };
 
 export function ProjectDialog({ open, onOpenChange, project, onSave }: ProjectDialogProps) {
   const [name, setName] = React.useState("");
+  const [icon, setIcon] = React.useState(iconNames[0]);
+
 
   React.useEffect(() => {
     if (open) {
       setName(project?.name || "");
+      setIcon(project?.icon || iconNames[0]);
     }
   }, [open, project]);
 
@@ -35,7 +39,7 @@ export function ProjectDialog({ open, onOpenChange, project, onSave }: ProjectDi
       alert("Project name is required.");
       return;
     }
-    onSave({ name });
+    onSave({ name, icon });
     onOpenChange(false);
   };
 
@@ -47,7 +51,7 @@ export function ProjectDialog({ open, onOpenChange, project, onSave }: ProjectDi
             {project ? "Edit Project" : "Create Project"}
           </DialogTitle>
           <DialogDescription>
-            {project ? "Update the details of your project." : "Enter the name for your new project."}
+            {project ? "Update the details of your project." : "Enter the details for your new project."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -59,6 +63,16 @@ export function ProjectDialog({ open, onOpenChange, project, onSave }: ProjectDi
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="icon" className="text-right">
+              Icon
+            </Label>
+            <IconPicker
+              selectedIcon={icon}
+              onIconChange={setIcon}
               className="col-span-3"
             />
           </div>

@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Calendar, Flag } from "lucide-react";
+import { iconMap } from "../project/icon-picker";
 
 type TaskCardProps = {
   task: Task;
@@ -35,6 +36,8 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
     e.dataTransfer.setData("text/plain", task.id);
   };
   
+  const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : null;
+
   return (
     <Card 
       draggable 
@@ -49,9 +52,9 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
         )}
       </CardHeader>
       <CardContent className="flex flex-wrap items-center gap-2">
-        {project && (
+        {project && ProjectIcon && (
           <Badge variant="outline" className="text-xs font-medium">
-             <project.icon className="mr-1.5 h-3 w-3" />
+             <ProjectIcon className="mr-1.5 h-3 w-3" />
             {project.name}
           </Badge>
         )}

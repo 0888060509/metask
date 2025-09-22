@@ -33,6 +33,8 @@ import {
   MoreVertical,
   Trash2,
 } from "lucide-react";
+import { iconMap } from "../project/icon-picker";
+
 
 type TaskDetailDialogProps = {
   task: Task | null;
@@ -85,6 +87,7 @@ export function TaskDetailDialog({
 
   const assignee = users.find((user) => user.id === task.assigneeId);
   const project = projects.find((p) => p.id === task.projectId);
+  const ProjectIcon = project ? (iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText) : Folder;
 
   const handleEdit = () => {
     onOpenChange(false);
@@ -135,7 +138,7 @@ export function TaskDetailDialog({
           {project && (
             <DetailRow icon={Folder} label="Project">
               <div className="flex items-center gap-2">
-                <project.icon className="h-4 w-4 text-muted-foreground" />
+                <ProjectIcon className="h-4 w-4 text-muted-foreground" />
                 <span>{project.name}</span>
               </div>
             </DetailRow>

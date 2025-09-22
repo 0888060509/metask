@@ -1,4 +1,3 @@
-import { FileText, BarChart2, Package, Users } from "lucide-react";
 import type { User, Project, Task } from "./types";
 
 export const users: User[] = [
@@ -9,10 +8,10 @@ export const users: User[] = [
 ];
 
 export const projects: Project[] = [
-  { id: "proj-1", name: "Website Redesign", icon: FileText },
-  { id: "proj-2", name: "Mobile App", icon: Package },
-  { id: "proj-3", name: "Marketing Campaign", icon: BarChart2 },
-  { id: "proj-4", name: "Team Onboarding", icon: Users },
+  { id: "proj-1", name: "Website Redesign", icon: "FileText" },
+  { id: "proj-2", name: "Mobile App", icon: "Package" },
+  { id: "proj-3", name: "Marketing Campaign", icon: "BarChart2" },
+  { id: "proj-4", name: "Team Onboarding", icon: "Users" },
 ];
 
 export const tasks: Task[] = [

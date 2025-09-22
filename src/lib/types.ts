@@ -23,5 +23,5 @@ export type User = {
 export type Project = {
   id: string;
   name: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: string;
 };
