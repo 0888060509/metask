@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from "react";
@@ -197,7 +198,16 @@ export function TaskDetailDialog({
             <SheetHeader className="p-6 border-b">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-2">
-                        {/* Placeholder for a potential icon */}
+                        {isEditing ? (
+                                <Input 
+                                id="title" 
+                                value={currentTask.title || ''} 
+                                onChange={(e) => handleFieldChange('title', e.target.value)}
+                                className="font-headline text-2xl h-auto p-0 border-0 shadow-none focus-visible:ring-0"
+                            />
+                        ) : (
+                            <SheetTitle className="font-headline text-2xl flex-1 break-words">{task.title}</SheetTitle>
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
                         {isEditing ? (
@@ -245,16 +255,6 @@ export function TaskDetailDialog({
             <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-0 overflow-y-auto">
                 {/* Left Column: Title and Description */}
                 <div className="md:col-span-2 p-6 space-y-6">
-                    {isEditing ? (
-                            <Input 
-                            id="title" 
-                            value={currentTask.title || ''} 
-                            onChange={(e) => handleFieldChange('title', e.target.value)}
-                            className="font-headline text-2xl h-auto p-0 border-0 shadow-none focus-visible:ring-0"
-                        />
-                    ) : (
-                        <SheetTitle className="font-headline text-2xl flex-1 break-words">{task.title}</SheetTitle>
-                    )}
                     {isEditing ? (
                         <Textarea
                             id="description"
@@ -477,5 +477,7 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
+
+    
 
     
