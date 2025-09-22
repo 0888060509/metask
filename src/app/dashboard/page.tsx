@@ -4,19 +4,30 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { tasks as initialTasks, users as initialUsers } from "@/lib/data";
-import { User, Task } from "@/lib/types";
+import { tasks as initialTasks, users as initialUsers, projects as initialProjects } from "@/lib/data";
+import { User, Task, Project } from "@/lib/types";
 import { WorkloadDistributionChart } from "@/components/dashboard/workload-distribution-chart";
 import { IndividualPerformanceMetrics } from "@/components/dashboard/individual-performance-metrics";
+import { ProjectSummaryReport } from "@/components/dashboard/project-summary-report";
 
 export default function DashboardPage() {
     const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
     const [users, setUsers] = React.useState<User[]>(initialUsers);
+    const [projects, setProjects] = React.useState<Project[]>(initialProjects);
 
     return (
         <div className="flex h-full flex-col">
             <AppHeader title="Dashboard" />
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline">Project Summary</CardTitle>
+                        <CardDescription>Get a high-level overview of all your projects.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ProjectSummaryReport projects={projects} tasks={tasks} />
+                    </CardContent>
+                </Card>
                 <Card>
                     <CardHeader>
                         <CardTitle className="font-headline">Workload Distribution</CardTitle>
