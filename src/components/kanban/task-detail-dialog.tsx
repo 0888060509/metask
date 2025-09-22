@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -31,6 +32,8 @@ import {
   Edit,
   MoreVertical,
   Trash2,
+  MessageSquare,
+  Clock,
 } from "lucide-react";
 import { iconMap } from "../project/icon-picker";
 
@@ -100,89 +103,114 @@ export function TaskDetailDialog({
 
   return (
     <Dialog open={!!task} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
             <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 space-y-1">
                     <DialogTitle className="font-headline text-2xl">{task.title}</DialogTitle>
                     {task.description && <p className="text-muted-foreground pt-1">{task.description}</p>}
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                        <MoreVertical className="h-5 w-5" />
-                        <span className="sr-only">More actions</span>
-                    </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEdit}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Delete</span>
-                    </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                            <MoreVertical className="h-5 w-5" />
+                            <span className="sr-only">More actions</span>
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleEdit}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                        </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <DetailRow icon={CheckCircle} label="Status">
-            <Badge className={cn("text-white", statusClasses[task.status])}>
-              {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-            </Badge>
-          </DetailRow>
+        <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="comments">Comments</TabsTrigger>
+                <TabsTrigger value="activity">Activity</TabsTrigger>
+            </TabsList>
+            <TabsContent value="details" className="py-4">
+                <div className="grid gap-4">
+                    <DetailRow icon={CheckCircle} label="Status">
+                        <Badge className={cn("text-white", statusClasses[task.status])}>
+                        {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                        </Badge>
+                    </DetailRow>
 
-          <DetailRow icon={Flag} label="Priority">
-            <span
-              className={cn("font-medium", priorityClasses[task.priority])}
-            >
-              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-            </span>
-          </DetailRow>
+                    <DetailRow icon={Flag} label="Priority">
+                        <span
+                        className={cn("font-medium", priorityClasses[task.priority])}
+                        >
+                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                        </span>
+                    </DetailRow>
 
-          {assignee && (
-            <DetailRow icon={User} label="Assignee">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
-                  <AvatarFallback>
-                    {assignee.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <span>{assignee.name}</span>
-              </div>
-            </DetailRow>
-          )}
+                    {assignee && (
+                        <DetailRow icon={User} label="Assignee">
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                            <AvatarImage src={assignee.avatarUrl} alt={assignee.name} data-ai-hint="person portrait"/>
+                            <AvatarFallback>
+                                {assignee.name.charAt(0)}
+                            </AvatarFallback>
+                            </Avatar>
+                            <span>{assignee.name}</span>
+                        </div>
+                        </DetailRow>
+                    )}
 
-          {project && (
-            <DetailRow icon={Folder} label="Project">
-              <div className="flex items-center gap-2">
-                <ProjectIcon className="h-4 w-4 text-muted-foreground" />
-                <span>{project.name}</span>
-              </div>
-            </DetailRow>
-          )}
+                    {project && (
+                        <DetailRow icon={Folder} label="Project">
+                        <div className="flex items-center gap-2">
+                            <ProjectIcon className="h-4 w-4 text-muted-foreground" />
+                            <span>{project.name}</span>
+                        </div>
+                        </DetailRow>
+                    )}
 
-          {task.deadline && (
-            <DetailRow icon={Calendar} label="Deadline">
-              {format(task.deadline, "PPP")}
-            </DetailRow>
-          )}
+                    {task.deadline && (
+                        <DetailRow icon={Calendar} label="Deadline">
+                        {format(task.deadline, "PPP")}
+                        </DetailRow>
+                    )}
 
-          {task.tags && task.tags.length > 0 && (
-            <DetailRow icon={Tag} label="Tags">
-              <div className="flex flex-wrap gap-2">
-                {task.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </DetailRow>
-          )}
-        </div>
+                    {task.tags && task.tags.length > 0 && (
+                        <DetailRow icon={Tag} label="Tags">
+                        <div className="flex flex-wrap gap-2">
+                            {task.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                                {tag}
+                            </Badge>
+                            ))}
+                        </div>
+                        </DetailRow>
+                    )}
+                </div>
+            </TabsContent>
+             <TabsContent value="comments">
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <MessageSquare className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-lg font-medium">No comments yet</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Be the first to add a comment.</p>
+                </div>
+            </TabsContent>
+            <TabsContent value="activity">
+                 <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Clock className="h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-lg font-medium">No activity yet</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Recent changes to this task will appear here.</p>
+                </div>
+            </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
