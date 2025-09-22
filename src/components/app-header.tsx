@@ -1,0 +1,85 @@
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Home,
+  LogOut,
+  Moon,
+  Plus,
+  Search,
+  Settings,
+  Sun,
+  User,
+} from "lucide-react";
+import { SidebarTrigger } from "./ui/sidebar";
+
+type AppHeaderProps = {
+  onNewTaskClick: () => void;
+};
+
+export function AppHeader({ onNewTaskClick }: AppHeaderProps) {
+  return (
+    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
+      <SidebarTrigger className="md:hidden" />
+      <div className="flex w-full items-center justify-between">
+        <div className="hidden md:block">
+            <h1 className="font-headline text-2xl font-bold">Tasks</h1>
+        </div>
+        <div className="relative flex-1 md:max-w-md">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search tasks..." className="pl-8" />
+        </div>
+        <div className="flex items-center gap-2">
+            <Button onClick={onNewTaskClick}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Task
+            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                    <Avatar>
+                    <AvatarImage src="https://picsum.photos/seed/5/40/40" alt="User Avatar" data-ai-hint="woman smiling"/>
+                    <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                    <User className="mr-2" />
+                    <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Settings className="mr-2" />
+                    <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                    <LogOut className="mr-2" />
+                    <span>Log out</span>
+                </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+      </div>
+    </header>
+  );
+}

@@ -11,7 +11,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        headline: ['Montserrat', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
@@ -44,6 +44,14 @@ export default {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+        },
+        success: {
+          DEFAULT: '#34C759',
+          foreground: 'hsl(0 0% 100%)',
+        },
+        warning: {
+          DEFAULT: '#FF9500',
+          foreground: 'hsl(0 0% 100%)',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
