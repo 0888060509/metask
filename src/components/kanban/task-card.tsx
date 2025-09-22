@@ -1,3 +1,4 @@
+
 "use client";
 import React from "react";
 import { users, tags } from "@/lib/data";
@@ -75,11 +76,11 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
       </CardContent>
       <CardFooter className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {task.deadline && isClient && (
+          {task.deadline && (
             <>
               <Calendar className="h-4 w-4" />
               <span>
-                {formatDistanceToNow(task.deadline, { addSuffix: true })}
+                {isClient ? formatDistanceToNow(task.deadline, { addSuffix: true }) : '...'}
               </span>
             </>
           )}
