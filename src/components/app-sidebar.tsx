@@ -100,29 +100,31 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
                 </SidebarMenuItem>
                 {projects.map((project) => (
                   <SidebarMenuItem key={project.id}>
-                    <SidebarMenuButton asChild>
-                      <Link href="#" className="flex-1">
-                        <project.icon />
-                        {project.name}
-                      </Link>
-                    </SidebarMenuButton>
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/menu-item:opacity-100">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onEditProject(project)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onDeleteProject(project)} className="text-red-600 focus:text-red-600">
-                             <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center w-full">
+                        <SidebarMenuButton asChild className="flex-1">
+                            <Link href="#">
+                                <project.icon />
+                                {project.name}
+                            </Link>
+                        </SidebarMenuButton>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 opacity-0 group-hover/menu-item:opacity-100">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => onEditProject(project)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                <span>Edit</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onDeleteProject(project)} className="text-red-600 focus:text-red-600">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Delete</span>
+                            </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
