@@ -184,12 +184,13 @@ export default function NotificationsPage() {
     
     const orderedGroups = ['Today', 'Yesterday', 'Older'].filter(group => groupedNotifications[group]);
     
-    const unreadCount = userNotifications.filter(n => !n.isRead).length;
+    const unreadCount = filteredNotifications.filter(n => !n.isRead).length;
     const unreadDirectCount = directNotifications.filter(n => !n.isRead).length;
     const unreadFollowingCount = followingNotifications.filter(n => !n.isRead).length;
 
     const handleMarkAllAsRead = () => {
-        setNotifications((prev: Notification[]) => prev.map(n => n.userId === currentUserId ? { ...n, isRead: true } : n));
+        const notificationIdsToMark = filteredNotifications.map(n => n.id);
+        setNotifications((prev: Notification[]) => prev.map(n => notificationIdsToMark.includes(n.id) ? { ...n, isRead: true } : n));
     };
 
     const handleMarkAsRead = (notificationId: string) => {
