@@ -49,3 +49,13 @@ export type Project = {
   name: string;
   icon: string;
 };
+
+export type Notification = {
+  id: string;
+  userId: string; // The user who should receive the notification
+  actorId: string; // The user who performed the action
+  type: 'comment' | 'assignment' | 'status_change';
+  taskId: string;
+  isRead: boolean;
+  timestamp: Date;
+};

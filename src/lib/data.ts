@@ -1,4 +1,4 @@
-import type { User, Project, Task, Tag } from "./types";
+import type { User, Project, Task, Tag, Notification } from "./types";
 
 export const users: User[] = [
   { id: "user-1", name: "Sarah Lee", avatarUrl: "https://picsum.photos/seed/1/40/40", email: "sarah@example.com" },
@@ -36,7 +36,7 @@ export const tasks: Task[] = [
     status: "inprogress",
     priority: "high",
     deadline: new Date(new Date().setDate(new Date().getDate() + 3)),
-    assigneeIds: ["user-1"],
+    assigneeIds: ["user-1", "user-4"],
     projectId: "proj-1",
     tagIds: ["tag-1", "tag-2"],
     comments: [
@@ -147,4 +147,53 @@ export const tasks: Task[] = [
     comments: [],
     activity: []
   },
+];
+
+// Mock notifications for the current user (e.g. user-4)
+export const notifications: Notification[] = [
+    {
+      id: "notif-1",
+      userId: "user-4",
+      actorId: "user-1",
+      type: "assignment",
+      taskId: "task-1",
+      isRead: false,
+      timestamp: new Date(new Date().setHours(new Date().getHours() - 2)),
+    },
+    {
+      id: "notif-2",
+      userId: "user-1",
+      actorId: "user-2",
+      type: "comment",
+      taskId: "task-1",
+      isRead: false,
+      timestamp: new Date(new Date().setHours(new Date().getHours() - 8)),
+    },
+    {
+      id: "notif-3",
+      userId: "user-4",
+      actorId: "user-3",
+      type: "status_change",
+      taskId: "task-7",
+      isRead: true,
+      timestamp: new Date(new Date().setDate(new Date().getDate() - 1)),
+    },
+     {
+      id: "notif-4",
+      userId: "user-4",
+      actorId: "user-2",
+      type: "comment",
+      taskId: "task-1",
+      isRead: true,
+      timestamp: new Date(new Date().setDate(new Date().getDate() - 2)),
+    },
+     {
+      id: "notif-5",
+      userId: "user-4",
+      actorId: "user-1",
+      type: "assignment",
+      taskId: "task-7",
+      isRead: true,
+      timestamp: new Date(new Date().setDate(new Date().getDate() - 4)),
+    },
 ];

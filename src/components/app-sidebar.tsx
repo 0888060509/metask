@@ -26,6 +26,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarSeparator,
+  SidebarMenuBadge,
 } from "./ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 import { Button } from "./ui/button";
@@ -40,9 +41,10 @@ type AppSidebarProps = {
     onNewProjectClick: () => void;
     onEditProject: (project: Project) => void;
     onDeleteProject: (project: Project) => void;
+    unreadNotificationCount: number;
 }
 
-export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDeleteProject }: AppSidebarProps) {
+export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDeleteProject, unreadNotificationCount }: AppSidebarProps) {
   const [isProjectsOpen, setIsProjectsOpen] = React.useState(true);
   const pathname = usePathname();
 
@@ -73,12 +75,13 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="#">
+            <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/notifications")}>
+              <Link href="/dashboard/notifications">
                 <Bell />
                 Notifications
               </Link>
             </SidebarMenuButton>
+            {unreadNotificationCount > 0 && <SidebarMenuBadge>{unreadNotificationCount}</SidebarMenuBadge>}
           </SidebarMenuItem>
         </SidebarMenu>
 

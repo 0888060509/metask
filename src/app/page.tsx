@@ -18,8 +18,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
-import { tasks as initialTasks, projects as initialProjects, tags as initialTags } from "@/lib/data";
-import type { Task, TaskPriority, Project, Comment, Tag } from "@/lib/types";
+import { tasks as initialTasks, projects as initialProjects, tags as initialTags, notifications as initialNotifications } from "@/lib/data";
+import type { Task, TaskPriority, Project, Comment, Tag, Notification } from "@/lib/types";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
 
@@ -33,6 +33,7 @@ export default function Home() {
   const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
   const [projects, setProjects] = React.useState<Project[]>(initialProjects);
   const [tags, setTags] = React.useState<Tag[]>(initialTags);
+  const [notifications, setNotifications] = React.useState<Notification[]>(initialNotifications);
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = React.useState(false);
@@ -48,6 +49,10 @@ export default function Home() {
     assignees: [],
     priorities: [],
   });
+  
+  // This would be the ID of the currently logged-in user.
+  const currentUserId = "user-4";
+  const unreadCount = notifications.filter(n => n.userId === currentUserId && !n.isRead).length;
 
   // Task handlers
   const handleCreateTask = (newTask: Omit<Task, "id" | "status" | "comments" | "activity">) => {
@@ -175,6 +180,7 @@ export default function Home() {
         onNewProjectClick={handleCreateProject}
         onEditProject={handleEditProject}
         onDeleteProject={confirmDeleteProject}
+        unreadNotificationCount={unreadCount}
       />
       <SidebarInset>
         <div className="flex h-full flex-col">
