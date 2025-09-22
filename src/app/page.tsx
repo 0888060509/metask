@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
 import { tasks as initialTasks, projects as initialProjects } from "@/lib/data";
-import type { Task, TaskPriority, Project } from "@/lib/types";
+import type { Task, TaskPriority, Project, Comment } from "@/lib/types";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export type Filters = {
@@ -55,6 +55,7 @@ export default function Home() {
       ...newTask,
       id: `task-${Date.now()}`,
       status: "todo",
+      comments: [],
     };
     setTasks((prevTasks) => [...prevTasks, taskWithId]);
   };
@@ -122,6 +123,32 @@ export default function Home() {
     }
   };
 
+  const handleAddComment = (taskId: string, commentText: string) => {
+    const newComment: Comment = {
+      id: `comment-${Date.now()}`,
+      taskId,
+      userId: "user-1", // Mocking current user
+      text: commentText,
+      createdAt: new Date(),
+    };
+
+    setTasks(prevTasks => {
+      const newTasks = prevTasks.map(task => {
+        if (task.id === taskId) {
+          const updatedTask = {
+            ...task,
+            comments: [...(task.comments || []), newComment]
+          };
+          if(selectedTask?.id === taskId) {
+            setSelectedTask(updatedTask);
+          }
+          return updatedTask;
+        }
+        return task;
+      });
+      return newTasks;
+    });
+  };
 
   const filteredTasks = React.useMemo(() => {
     return tasks.filter((task) => {
@@ -188,6 +215,7 @@ export default function Home() {
             onOpenChange={handleCloseDetailDialog}
             onEdit={handleOpenEditDialog}
             onDelete={handleDeleteTask}
+            onComment={handleAddComment}
           />
           <ProjectDialog 
             open={isProjectDialogOpen}

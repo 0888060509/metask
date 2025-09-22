@@ -26,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import {
   Calendar,
   Flag,
@@ -50,6 +50,7 @@ type TaskDetailSheetProps = {
   onOpenChange: (open: boolean) => void;
   onEdit: () => void;
   onDelete: (taskId: string) => void;
+  onComment: (taskId: string, commentText: string) => void;
 };
 
 const priorityClasses: Record<TaskPriority, string> = {
@@ -90,7 +91,10 @@ export function TaskDetailDialog({
   onOpenChange,
   onEdit,
   onDelete,
+  onComment,
 }: TaskDetailSheetProps) {
+  const [commentText, setCommentText] = React.useState("");
+
   if (!task) return null;
 
   const assignee = users.find((user) => user.id === task.assigneeId);
@@ -107,12 +111,22 @@ export function TaskDetailDialog({
     onDelete(task.id);
   }
 
+  const handleSendComment = () => {
+    if (commentText.trim()) {
+      onComment(task.id, commentText);
+      setCommentText("");
+    }
+  };
+
   return (
     <Sheet open={!!task} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right">
         <SheetHeader className="p-6">
-            <div className="flex items-center justify-between gap-4">
-                <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
+            <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 space-y-1">
+                    <SheetTitle className="font-headline text-2xl flex-1 truncate">{task.title}</SheetTitle>
+                    {task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>}
+                </div>
                 <div className="flex items-center gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -134,7 +148,6 @@ export function TaskDetailDialog({
                     </DropdownMenu>
                 </div>
             </div>
-            {task.description && <SheetDescription className="pt-1">{task.description}</SheetDescription>}
         </SheetHeader>
         
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6 pt-0">
@@ -215,25 +228,50 @@ export function TaskDetailDialog({
             </div>
 
             {/* Right Column: Comments */}
-            <div className="md:col-span-1 space-y-6">
-                <div className="space-y-4">
-                     <h3 className="font-semibold text-lg flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" /> Comments</h3>
-                     <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
-                        <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
-                        <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
-                    </div>
+            <div className="md:col-span-1 space-y-6 flex flex-col">
+                <h3 className="font-semibold text-lg flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" /> Comments</h3>
+                <div className="flex-1 space-y-4 pr-2 -mr-2 overflow-y-auto">
+                    {task.comments && task.comments.length > 0 ? (
+                        task.comments.map((comment) => {
+                            const commentUser = users.find(u => u.id === comment.userId);
+                            return (
+                            <div key={comment.id} className="flex items-start gap-3">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={commentUser?.avatarUrl} data-ai-hint="person portrait"/>
+                                    <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-sm">{commentUser?.name}</p>
+                                        <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
+                                    </div>
+                                    <p className="text-sm bg-muted rounded-lg p-2 mt-1">{comment.text}</p>
+                                </div>
+                            </div>
+                            );
+                        })
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed h-full">
+                            <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
+                            <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
+                        </div>
+                    )}
+                </div>
+                <div className="relative mt-auto">
+                    <Textarea 
+                        placeholder="Add a comment..." 
+                        className="pr-12"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
+                    />
+                    <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
+                        <Send className="h-4 w-4"/>
+                        <span className="sr-only">Send Comment</span>
+                    </Button>
                 </div>
             </div>
         </div>
-        <SheetFooter className="p-6 pt-0">
-            <div className="relative w-full">
-                <Textarea placeholder="Add a comment..." className="pr-12"/>
-                <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8">
-                    <Send className="h-4 w-4"/>
-                    <span className="sr-only">Send Comment</span>
-                </Button>
-            </div>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

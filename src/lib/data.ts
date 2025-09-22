@@ -25,6 +25,10 @@ export const tasks: Task[] = [
     assigneeId: "user-1",
     projectId: "proj-1",
     tags: ["design", "ui/ux"],
+    comments: [
+      { id: 'comment-1', taskId: 'task-1', userId: 'user-2', text: "How's this going?", createdAt: new Date(new Date().setDate(new Date().getDate() - 1)) },
+      { id: 'comment-2', taskId: 'task-1', userId: 'user-1', text: "Almost done, will share soon.", createdAt: new Date() },
+    ]
   },
   {
     id: "task-2",
@@ -36,6 +40,7 @@ export const tasks: Task[] = [
     assigneeId: "user-3",
     projectId: "proj-2",
     tags: ["development", "auth"],
+    comments: [],
   },
   {
     id: "task-3",
@@ -47,6 +52,7 @@ export const tasks: Task[] = [
     assigneeId: "user-2",
     projectId: "proj-3",
     tags: ["marketing", "content"],
+    comments: [],
   },
   {
     id: "task-4",
@@ -58,6 +64,7 @@ export const tasks: Task[] = [
     assigneeId: "user-1",
     projectId: "proj-1",
     tags: ["design", "ui/ux"],
+    comments: [],
   },
   {
     id: "task-5",
@@ -67,6 +74,7 @@ export const tasks: Task[] = [
     assigneeId: "user-3",
     projectId: "proj-2",
     tags: ["devops", "development"],
+    comments: [],
   },
   {
     id: "task-6",
@@ -77,6 +85,7 @@ export const tasks: Task[] = [
     assigneeId: "user-2",
     projectId: "proj-3",
     tags: ["marketing", "copywriting"],
+    comments: [],
   },
   {
     id: "task-7",
@@ -88,6 +97,7 @@ export const tasks: Task[] = [
     assigneeId: "user-4",
     projectId: "proj-1",
     tags: ["research", "ux"],
+    comments: [],
   },
   {
     id: "task-8",
@@ -99,5 +109,6 @@ export const tasks: Task[] = [
     assigneeId: "user-3",
     projectId: "proj-2",
     tags: ["bug", "mobile"],
+    comments: [],
   },
 ];

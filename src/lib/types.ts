@@ -1,6 +1,14 @@
 export type TaskStatus = "todo" | "inprogress" | "done";
 export type TaskPriority = "low" | "medium" | "high";
 
+export type Comment = {
+  id: string;
+  taskId: string;
+  userId: string;
+  text: string;
+  createdAt: Date;
+};
+
 export type Task = {
   id: string;
   title: string;
@@ -11,6 +19,7 @@ export type Task = {
   assigneeId?: string;
   projectId: string;
   tags?: string[];
+  comments?: Comment[];
 };
 
 export type User = {
