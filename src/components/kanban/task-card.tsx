@@ -31,6 +31,11 @@ const priorityClasses: Record<Task["priority"], string> = {
 
 export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
   const assignee = users.find((user) => user.id === task.assigneeId);
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData("text/plain", task.id);
@@ -73,7 +78,7 @@ export function TaskCard({ task, project, onTaskClick }: TaskCardProps) {
       </CardContent>
       <CardFooter className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {task.deadline && (
+          {task.deadline && isClient && (
             <>
               <Calendar className="h-4 w-4" />
               <span>
