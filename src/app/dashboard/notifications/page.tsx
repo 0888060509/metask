@@ -5,10 +5,11 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { tasks, users } from "@/lib/data";
-import { Notification, Task, User, Comment } from "@/lib/types";
-import { format, formatDistanceToNowStrict, isToday, isYesterday } from "date-fns";
+import { Notification, Task, User } from "@/lib/types";
+import { isToday, isYesterday } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MessageSquare, UserPlus, CheckCircle, AtSign, FileClock, Check } from "lucide-react";
 import { DashboardContext } from "../layout";
@@ -199,28 +200,27 @@ export default function NotificationsPage() {
 
     return (
         <div className="flex h-full flex-col">
-            <AppHeader title="Notifications">
-                 <div className="flex items-center gap-4">
-                    <Tabs value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
-                        <TabsList>
-                            <TabsTrigger value="all" className="flex items-center gap-2">
-                                All
-                            </TabsTrigger>
-                            <TabsTrigger value="direct" className="flex items-center gap-2">
-                                Direct
-                                {unreadDirectCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadDirectCount}</Badge>}
-                            </TabsTrigger>
-                            <TabsTrigger value="following" className="flex items-center gap-2">
-                                Following
-                                {unreadFollowingCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadFollowingCount}</Badge>}
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                    {unreadCount > 0 && (
-                        <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">Mark all as read</Button>
-                    )}
-                 </div>
-            </AppHeader>
+            <AppHeader title="Notifications" />
+            <div className="border-b px-4 py-2 flex items-center justify-between">
+                <Tabs value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
+                    <TabsList>
+                        <TabsTrigger value="all" className="flex items-center gap-2">
+                            All
+                        </TabsTrigger>
+                        <TabsTrigger value="direct" className="flex items-center gap-2">
+                            Direct
+                            {unreadDirectCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadDirectCount}</Badge>}
+                        </TabsTrigger>
+                        <TabsTrigger value="following" className="flex items-center gap-2">
+                            Following
+                            {unreadFollowingCount > 0 && <Badge variant="secondary" className="px-1.5">{unreadFollowingCount}</Badge>}
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
+                {unreadCount > 0 && (
+                    <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">Mark all as read</Button>
+                )}
+            </div>
             <div className="flex-1 overflow-y-auto">
                 <Card className="max-w-3xl mx-auto my-4 md:my-6">
                     <CardContent className="p-0">

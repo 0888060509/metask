@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ProjectDialog } from "@/components/project/project-dialog";
 import { tasks as initialTasks, projects as allProjects, tags as initialTags } from "@/lib/data";
-import type { Task, TaskPriority, Project, Comment, Tag, Notification } from "@/lib/types";
+import type { Task, TaskPriority, Project, Comment, Tag } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardContext } from "../../../layout";
 
@@ -38,7 +38,7 @@ function ProjectTabs({ projectId }: { projectId: string }) {
     const isDashboard = !pathname.endsWith('/tasks');
 
     return (
-        <Tabs value={isDashboard ? 'dashboard' : 'tasks'} className="w-full">
+        <Tabs value={isDashboard ? 'dashboard' : 'tasks'}>
             <TabsList>
                 <TabsTrigger value="dashboard" asChild>
                     <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
@@ -180,9 +180,10 @@ function ProjectTasksClient({ params }: { params: { id: string } }) {
     <div className="flex h-full flex-col">
       <AppHeader 
         title={project.name}
-      >
+      />
+      <div className="border-b px-4 py-2">
         <ProjectTabs projectId={project.id} />
-      </AppHeader>
+      </div>
       <KanbanToolbar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}

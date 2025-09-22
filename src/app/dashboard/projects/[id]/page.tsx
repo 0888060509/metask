@@ -115,7 +115,7 @@ function ProjectTabs({ projectId }: { projectId: string }) {
     const isDashboard = !pathname.endsWith('/tasks');
 
     return (
-        <Tabs value={isDashboard ? 'dashboard' : 'tasks'} className="w-full">
+        <Tabs value={isDashboard ? 'dashboard' : 'tasks'}>
             <TabsList>
                 <TabsTrigger value="dashboard" asChild>
                     <Link href={`/dashboard/projects/${projectId}`}>Dashboard</Link>
@@ -146,9 +146,10 @@ function ProjectDashboardClient({ params }: { params: { id: string } }) {
 
     return (
         <div className="flex h-full flex-col">
-            <AppHeader title={project.name}>
+            <AppHeader title={project.name} />
+             <div className="border-b px-4 py-2">
                 <ProjectTabs projectId={project.id} />
-            </AppHeader>
+            </div>
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                      <Card>
