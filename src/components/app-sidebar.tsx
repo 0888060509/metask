@@ -70,6 +70,14 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === "/"}>
+                    <Link href="/">
+                        <LayoutGrid />
+                        All Tasks
+                    </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith("/dashboard/tags")}>
               <Link href="/dashboard/tags">
                 <Tag />
@@ -107,14 +115,6 @@ export function AppSidebar({ projects, onNewProjectClick, onEditProject, onDelet
             </div>
             <CollapsibleContent>
               <SidebarMenu>
-                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname === "/"}>
-                        <Link href="/">
-                            <LayoutGrid />
-                            All Tasks
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
                 {projects.map((project) => {
                   const Icon = iconMap[project.icon as keyof typeof iconMap] || iconMap.FileText;
                   return (
