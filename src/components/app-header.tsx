@@ -23,15 +23,21 @@ import {
 import { SidebarTrigger } from "./ui/sidebar";
 
 type AppHeaderProps = {
-  onNewTaskClick: () => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  title: string;
+  onNewTaskClick?: () => void;
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
+  showSearch?: boolean;
+  showCreateTask?: boolean;
 };
 
 export function AppHeader({ 
+  title,
   onNewTaskClick, 
   searchQuery, 
   setSearchQuery,
+  showSearch = false,
+  showCreateTask = false,
 }: AppHeaderProps) {
   return (
     <>
@@ -39,22 +45,26 @@ export function AppHeader({
         <SidebarTrigger className="md:hidden" />
         <div className="flex w-full items-center justify-between">
           <div className="hidden md:block">
-              <h1 className="font-headline text-2xl font-bold">All Tasks</h1>
+              <h1 className="font-headline text-2xl font-bold">{title}</h1>
           </div>
-          <div className="relative flex-1 md:max-w-md">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search tasks..." 
-              className="pl-8" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-              <Button onClick={onNewTaskClick}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Task
-              </Button>
+          {showSearch && setSearchQuery && (
+            <div className="relative flex-1 md:max-w-md">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search tasks..." 
+                className="pl-8" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-2 ml-auto">
+              {showCreateTask && onNewTaskClick && (
+                <Button onClick={onNewTaskClick}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Task
+                </Button>
+              )}
               <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">

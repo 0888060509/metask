@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AppHeader } from "@/components/app-header";
+import { AppSidebar } from "@/components/app-sidebar";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { TaskDetailDialog } from "@/components/kanban/task-detail-dialog";
@@ -19,7 +20,6 @@ import {
 import { ProjectDialog } from "@/components/project/project-dialog";
 import { tasks as initialTasks, projects as initialProjects } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
-import { AppSidebar } from "@/components/app-sidebar";
 
 export type Filters = {
   projects: string[];
@@ -142,17 +142,20 @@ export default function Home() {
 
   return (
     <>
-      <AppSidebar 
-        projects={projects} 
+      <AppSidebar
+        projects={projects}
         onNewProjectClick={handleCreateProject}
         onEditProject={handleEditProject}
         onDeleteProject={confirmDeleteProject}
       />
       <div className="flex h-full flex-col">
         <AppHeader 
+          title="All Tasks"
           onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          showCreateTask
+          showSearch
         />
         <TaskFilters filters={filters} setFilters={setFilters} projects={projects} />
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -204,6 +207,6 @@ export default function Home() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </>
+      </>
   );
 }
