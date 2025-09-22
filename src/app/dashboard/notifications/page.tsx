@@ -14,12 +14,16 @@ import { MessageSquare, UserPlus, CheckCircle, AtSign, FileClock, Check } from "
 import { DashboardContext } from "../layout";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 type NotificationItemProps = {
   notification: Notification;
   onNotificationClick: (taskId: string) => void;
   onMarkAsRead: (notificationId: string) => void;
 };
+
+type FilterType = "all" | "direct" | "following";
 
 const notificationIcons = {
   comment: MessageSquare,
@@ -140,6 +144,7 @@ type GroupedNotifications = {
 
 export default function NotificationsPage() {
     const context = React.useContext(DashboardContext);
+    const [filterType, setFilterType] = React.useState<FilterType>('all');
 
     if (!context) {
         return <div>Loading...</div>;
@@ -152,7 +157,20 @@ export default function NotificationsPage() {
         .filter((n: Notification) => n.userId === currentUserId)
         .sort((a: Notification, b: Notification) => b.timestamp.getTime() - a.timestamp.getTime());
     
-    const groupedNotifications = userNotifications.reduce((acc: GroupedNotifications, notif: Notification) => {
+    const filteredNotifications = React.useMemo(() => {
+        if (filterType === 'all') {
+            return userNotifications;
+        }
+        if (filterType === 'direct') {
+            return userNotifications.filter(n => n.type === 'mention' || n.type === 'assignment' || n.type === 'due_reminder');
+        }
+        if (filterType === 'following') {
+            return userNotifications.filter(n => n.type === 'new_comment' || n.type === 'status_change');
+        }
+        return [];
+    }, [userNotifications, filterType]);
+
+    const groupedNotifications = filteredNotifications.reduce((acc: GroupedNotifications, notif: Notification) => {
         let key = 'Older';
         if (isToday(notif.timestamp)) {
             key = 'Today';
@@ -190,10 +208,19 @@ export default function NotificationsPage() {
                     <CardHeader>
                         <CardTitle className="font-headline">Your Updates</CardTitle>
                     </CardHeader>
+                    <div className="px-6 border-b">
+                         <Tabs value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
+                            <TabsList>
+                                <TabsTrigger value="all">All</TabsTrigger>
+                                <TabsTrigger value="direct">Direct</TabsTrigger>
+                                <TabsTrigger value="following">Following</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                    </div>
                     <CardContent className="p-0">
-                        {userNotifications.length === 0 ? (
+                        {filteredNotifications.length === 0 ? (
                              <div className="text-center p-12">
-                                <p className="text-muted-foreground">You have no new notifications.</p>
+                                <p className="text-muted-foreground">You have no notifications for this filter.</p>
                             </div>
                         ) : (
                            orderedGroups.map((group) => (
