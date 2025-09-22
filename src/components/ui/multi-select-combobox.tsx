@@ -19,6 +19,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "./badge";
+import { buttonVariants } from "@/components/ui/button";
+
 
 type MultiSelectComboboxProps = {
   options: { value: string; label: string }[];
@@ -59,42 +61,43 @@ export function MultiSelectCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className={cn("relative w-full", className)}>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className={cn(
-              "w-full justify-between h-auto min-h-10",
-              selected.length === 0 && "text-muted-foreground"
-            )}
-            onClick={() => setOpen(!open)}
-          >
-            <div className="flex gap-1 flex-wrap">
-              {selectedOptions.length > 0 ? (
-                selectedOptions.map(option => option && (
-                  <Badge
-                    key={option.value}
-                    variant="secondary"
-                    className="rounded-sm"
-                  >
-                    {option.label}
-                    <button
-                      className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                      onClick={(e) => {
-                        e.stopPropagation(); // prevent popover from opening/closing
-                        handleRemove(option.value);
-                      }}
-                    >
-                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                    </button>
-                  </Badge>
-                ))
-              ) : (
-                placeholder
+            <div 
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "w-full justify-between h-auto min-h-10",
+                selected.length === 0 && "text-muted-foreground",
+                "cursor-pointer"
               )}
+               onClick={() => setOpen(!open)}
+               role="combobox"
+               aria-expanded={open}
+            >
+              <div className="flex gap-1 flex-wrap">
+                {selectedOptions.length > 0 ? (
+                  selectedOptions.map(option => option && (
+                    <Badge
+                      key={option.value}
+                      variant="secondary"
+                      className="rounded-sm"
+                    >
+                      {option.label}
+                      <button
+                        className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent popover from opening/closing
+                          handleRemove(option.value);
+                        }}
+                      >
+                        <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    </Badge>
+                  ))
+                ) : (
+                  placeholder
+                )}
+              </div>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </div>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
