@@ -1,3 +1,5 @@
+"use client";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { tasks as initialTasks, projects as initialProjects, tags as initialTags } from "@/lib/data";
