@@ -29,6 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export default function SettingsPage() {
   const { setTheme, theme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
+  const [emailNotifications, setEmailNotifications] = React.useState(true);
 
   // This would be the ID of the currently logged-in user.
   const currentUserId = "user-4"
@@ -107,12 +108,20 @@ export default function SettingsPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="divide-y divide-border">
-                <div className="flex items-center justify-between py-4">
-                    <div>
-                        <p className="font-medium">Email Notifications</p>
-                        <p className="text-sm text-muted-foreground">Receive notifications via email.</p>
+                <div className="py-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="font-medium">Email Notifications</p>
+                            <p className="text-sm text-muted-foreground">Receive notifications via email.</p>
+                        </div>
+                        <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications}/>
                     </div>
-                    <Switch defaultChecked/>
+                    {emailNotifications && (
+                        <div className="space-y-2 pt-4">
+                            <Label htmlFor="notification-email">Email for updates</Label>
+                            <Input id="notification-email" type="email" defaultValue={currentUser?.email} placeholder="Enter email for notifications"/>
+                        </div>
+                    )}
                 </div>
                  <div className="flex items-center justify-between py-4">
                     <div>
