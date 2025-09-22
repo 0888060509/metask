@@ -10,7 +10,7 @@ import { AppHeader } from "@/components/app-header";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
-import { projects } from "@/lib/data";
+import { projects, tasks as allTasks } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardContext } from "../../../layout";
@@ -38,7 +38,7 @@ function ProjectTasksClient({ project }: { project: Project }) {
   const context = React.useContext(DashboardContext);
     
   if (!context) return null;
-  const { tasks, setTasks, openTask, tags } = context;
+  const { tasks, setTasks, openTask, tags, projects } = context;
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
 
