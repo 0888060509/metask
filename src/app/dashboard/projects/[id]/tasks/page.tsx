@@ -85,11 +85,13 @@ function ProjectTasksClient({ project, projectTasks }: { project: Project, proje
 
   return (
     <div className="flex h-full flex-col">
-      <AppHeader title={project.name} />
-       <div className="border-b px-4 py-2">
-        <Tabs value={'tasks'}>
-          <ProjectTabs projectId={project.id} />
-        </Tabs>
+        <div className="sticky top-0 z-10">
+            <AppHeader title={project.name} />
+            <div className="border-b bg-background px-4 py-2">
+                <Tabs value={'tasks'}>
+                    <ProjectTabs projectId={project.id} />
+                </Tabs>
+            </div>
       </div>
       <KanbanToolbar
         searchQuery={searchQuery}
