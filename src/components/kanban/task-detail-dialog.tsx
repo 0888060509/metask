@@ -245,7 +245,7 @@ export function TaskDetailDialog({
                                         <p className="font-semibold text-sm">{commentUser?.name}</p>
                                         <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
                                     </div>
-                                    <p className="text-sm bg-muted rounded-lg p-2 mt-1">{comment.text}</p>
+                                    <p className="text-sm bg-muted rounded-lg p-2 mt-1 break-words">{comment.text}</p>
                                 </div>
                             </div>
                             );
@@ -276,3 +276,4 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
+
