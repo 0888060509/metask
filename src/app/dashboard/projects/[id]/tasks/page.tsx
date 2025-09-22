@@ -9,7 +9,7 @@ import { AppHeader } from "@/components/app-header";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { TaskDialog } from "@/components/kanban/task-dialog";
 import { KanbanToolbar } from "@/components/kanban/kanban-toolbar";
-import { projects, tasks } from "@/lib/data";
+import { projects, tasks as allTasks } from "@/lib/data";
 import type { Task, TaskPriority, Project } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardContext } from "../../../layout";
@@ -37,7 +37,7 @@ function ProjectTasksClient({ project, projectTasks }: { project: Project, proje
   const context = React.useContext(DashboardContext);
     
   if (!context) return null;
-  const { tasks: allTasks, setTasks, openTask, tags, projects: allProjects } = context;
+  const { setTasks, openTask, tags, projects: allProjects } = context;
 
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = React.useState(false);
 
@@ -85,13 +85,13 @@ function ProjectTasksClient({ project, projectTasks }: { project: Project, proje
 
   return (
     <div className="flex h-full flex-col">
-        <div className="sticky top-0 z-10">
-            <AppHeader title={project.name} />
-            <div className="border-b bg-background px-4 py-2">
-                <Tabs value={'tasks'}>
-                    <ProjectTabs projectId={project.id} />
-                </Tabs>
-            </div>
+       <div className="sticky top-0 z-10 bg-background">
+          <AppHeader title={project.name} />
+          <div className="border-b px-4 py-2">
+              <Tabs value={'tasks'}>
+                  <ProjectTabs projectId={project.id} />
+              </Tabs>
+          </div>
       </div>
       <KanbanToolbar
         searchQuery={searchQuery}
@@ -131,7 +131,7 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
     if (!project) {
         notFound();
     }
-    const projectTasks = tasks.filter(t => t.projectId === params.id);
+    const projectTasks = allTasks.filter(t => t.projectId === params.id);
   
     return <ProjectTasksClient project={project} projectTasks={projectTasks} />;
 }
