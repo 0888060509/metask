@@ -5,7 +5,7 @@
 import React from "react";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { tasks as allTasks, projects as allProjects } from "@/lib/data";
+import { allProjects } from "@/lib/data";
 import { Task, Project } from "@/lib/types";
 import { notFound } from 'next/navigation';
 import { differenceInBusinessDays, formatDistanceToNow, isAfter, isBefore } from "date-fns";
@@ -126,17 +126,18 @@ function ProjectTabs({ projectId }: { projectId: string }) {
 
 
 function ProjectDashboardClient({ params }: { params: { id: string } }) {
-    const project = allProjects.find(p => p.id === params.id);
     const context = React.useContext(DashboardContext);
     
+    if (!context) return null;
+    const { tasks, openTask, projects } = context;
+    
+    const project = projects.find(p => p.id === params.id);
+
     if (!project) {
         notFound();
     }
-    
-    if (!context) return null;
-    const { openTask } = context;
 
-    const projectTasks = allTasks.filter(t => t.projectId === params.id);
+    const projectTasks = tasks.filter(t => t.projectId === params.id);
 
     const tasksByStatus = projectTasks.reduce((acc, task) => {
         acc[task.status] = (acc[task.status] || 0) + 1;
