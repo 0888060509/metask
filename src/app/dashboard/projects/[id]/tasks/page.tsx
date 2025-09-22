@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -150,7 +151,7 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
         (task.tagIds && task.tagIds.some(id => filters.tags.includes(id)));
       return searchMatch && assigneeMatch && priorityMatch && tagMatch;
     });
-  }, [tasks, filters, searchQuery, params.id]);
+  }, [tasks, filters, searchQuery, params]);
 
   return (
     <div className="flex h-full flex-col">
@@ -202,4 +203,5 @@ export default function ProjectTasksPage({ params }: { params: { id: string } })
     </div>
   );
 }
+
 
