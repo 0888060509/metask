@@ -54,6 +54,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { iconMap } from "../project/icon-picker";
+import { Separator } from "../ui/separator";
 
 
 type TaskDetailSheetProps = {
@@ -113,7 +114,6 @@ export function TaskDetailDialog({
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedTask, setEditedTask] = React.useState<Partial<Task>>({});
 
-  // Memoized options for performance
   const userOptions = React.useMemo(() => users.map(user => ({ value: user.id, label: user.name })), []);
   const projectOptions = React.useMemo(() => projects.map(project => ({ value: project.id, label: project.name })), [projects]);
   const tagOptions = React.useMemo(() => tags.map(tag => ({ value: tag.id, label: tag.name })), []);
@@ -129,10 +129,8 @@ export function TaskDetailDialog({
     }
   }, [task]);
 
-  
   const handleEditToggle = () => {
     if (isEditing) {
-      // Cancel edit
       if(task) setEditedTask(task);
     }
     setIsEditing(!isEditing);
@@ -162,7 +160,7 @@ export function TaskDetailDialog({
   const handleFieldChange = (field: keyof Task, value: any) => {
     setEditedTask(prev => ({ ...prev, [field]: value }));
   };
-
+  
   const currentTask = isEditing ? editedTask : task;
   
   const assignees = React.useMemo(() => {
@@ -189,37 +187,17 @@ export function TaskDetailDialog({
 
   return (
     <Sheet open={!!task} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right">
+      <SheetContent className="sm:max-w-4xl w-full p-0 flex flex-col" side="right" hideCloseButton>
         {!task || !currentTask ? (
           <div className="flex items-center justify-center h-full">
             <p>Loading task...</p>
           </div>
         ) : (
           <>
-            <SheetHeader className="p-6">
+            <SheetHeader className="p-6 border-b">
                 <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                        {isEditing ? (
-                             <Input 
-                                id="title" 
-                                value={currentTask.title || ''} 
-                                onChange={(e) => handleFieldChange('title', e.target.value)}
-                                className="font-headline text-2xl h-auto p-0 border-0 shadow-none focus-visible:ring-0"
-                            />
-                        ) : (
-                            <SheetTitle className="font-headline text-2xl flex-1 break-words">{task.title}</SheetTitle>
-                        )}
-                        {isEditing ? (
-                           <Textarea
-                             id="description"
-                             value={currentTask.description || ''}
-                             onChange={(e) => handleFieldChange('description', e.target.value)}
-                             placeholder="Add a description..."
-                             className="text-sm text-muted-foreground p-0 border-0 shadow-none focus-visible:ring-0"
-                           />
-                        ) : (
-                           task.description && <SheetDescription className="pt-1 break-words">{task.description}</SheetDescription>
-                        )}
+                    <div className="flex items-center gap-2">
+                        {/* Placeholder for a potential icon */}
                     </div>
                     <div className="flex items-center gap-2">
                         {isEditing ? (
@@ -254,28 +232,128 @@ export function TaskDetailDialog({
                             </DropdownMenu>
                           </>
                         )}
-                        <SheetClose className="ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
-                          <X className="h-4 w-4" />
-                          <span className="sr-only">Close</span>
+                        <SheetClose asChild>
+                            <Button variant="ghost" size="icon">
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Close</span>
+                            </Button>
                         </SheetClose>
                     </div>
                 </div>
             </SheetHeader>
             
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6 pt-0">
-                {/* Left Column: Tabs for Details and Activity */}
-                <div className="md:col-span-2 space-y-6">
-                  <Tabs defaultValue="details">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="details">Details</TabsTrigger>
-                      <TabsTrigger value="activity">Activity</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="details">
-                      <div className="space-y-4 rounded-lg border p-4 mt-4">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-0 overflow-y-auto">
+                {/* Left Column: Title and Description */}
+                <div className="md:col-span-2 p-6 space-y-6">
+                    {isEditing ? (
+                            <Input 
+                            id="title" 
+                            value={currentTask.title || ''} 
+                            onChange={(e) => handleFieldChange('title', e.target.value)}
+                            className="font-headline text-2xl h-auto p-0 border-0 shadow-none focus-visible:ring-0"
+                        />
+                    ) : (
+                        <SheetTitle className="font-headline text-2xl flex-1 break-words">{task.title}</SheetTitle>
+                    )}
+                    {isEditing ? (
+                        <Textarea
+                            id="description"
+                            value={currentTask.description || ''}
+                            onChange={(e) => handleFieldChange('description', e.target.value)}
+                            placeholder="Add a description..."
+                            className="text-sm text-muted-foreground p-0 border-0 shadow-none focus-visible:ring-0 min-h-[100px]"
+                        />
+                    ) : (
+                        task.description && <SheetDescription className="pt-1 break-words whitespace-pre-wrap">{task.description}</SheetDescription>
+                    )}
+
+                    <Separator/>
+
+                    <Tabs defaultValue="comments">
+                        <TabsList>
+                            <TabsTrigger value="comments">Comments</TabsTrigger>
+                            <TabsTrigger value="activity">Activity</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="comments">
+                             <div className="space-y-4 mt-4">
+                                {task.comments && task.comments.length > 0 ? (
+                                    task.comments.map((comment) => {
+                                        const commentUser = users.find(u => u.id === comment.userId);
+                                        return (
+                                        <div key={comment.id} className="flex items-start gap-3">
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage src={commentUser?.avatarUrl} data-ai-hint="person portrait"/>
+                                                <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-semibold text-sm">{commentUser?.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
+                                                </div>
+                                                <p className="text-sm bg-muted rounded-lg p-2 mt-1 break-words">{comment.text}</p>
+                                            </div>
+                                        </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed h-full">
+                                        <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
+                                        <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
+                                    </div>
+                                )}
+                                <div className="relative mt-auto">
+                                    <Textarea 
+                                        placeholder="Add a comment..." 
+                                        className="pr-12"
+                                        value={commentText}
+                                        onChange={(e) => setCommentText(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
+                                    />
+                                    <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
+                                        <Send className="h-4 w-4"/>
+                                        <span className="sr-only">Send Comment</span>
+                                    </Button>
+                                </div>
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="activity">
+                             <div className="space-y-6 mt-4">
+                                {sortedActivity && sortedActivity.length > 0 ? (
+                                    sortedActivity.map(activity => {
+                                    const activityUser = users.find(u => u.id === activity.userId);
+                                    return (
+                                    <div key={activity.id} className="flex items-start gap-4">
+                                        <Avatar className="h-8 w-8 mt-1">
+                                            <AvatarImage src={activityUser?.avatarUrl} data-ai-hint="person portrait" />
+                                            <AvatarFallback>{activityUser?.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 text-sm">
+                                        <p className="break-words">{activity.details}</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                                        </p>
+                                        </div>
+                                    </div>
+                                    )
+                                })
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border-dashed">
+                                        <Clock className="h-10 w-10 text-muted-foreground/30" />
+                                        <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+
+                {/* Right Column: Details */}
+                <div className="md:col-span-1 space-y-6 p-6 bg-muted/30 border-l">
+                     <div className="space-y-4 rounded-lg">
                           <DetailRow icon={CheckCircle} label="Status" isEditing={isEditing}>
                               {isEditing ? (
                                 <Select value={currentTask.status} onValueChange={(v) => handleFieldChange('status', v as Task['status'])}>
-                                  <SelectTrigger className="h-8">
+                                  <SelectTrigger className="h-8 bg-background">
                                     <SelectValue/>
                                   </SelectTrigger>
                                   <SelectContent>
@@ -294,7 +372,7 @@ export function TaskDetailDialog({
                           <DetailRow icon={Flag} label="Priority" isEditing={isEditing}>
                              {isEditing ? (
                                 <Select value={currentTask.priority} onValueChange={(v) => handleFieldChange('priority', v as TaskPriority)}>
-                                    <SelectTrigger className="h-8">
+                                    <SelectTrigger className="h-8 bg-background">
                                         <SelectValue/>
                                     </SelectTrigger>
                                     <SelectContent>
@@ -319,6 +397,7 @@ export function TaskDetailDialog({
                                     placeholder="Select a project"
                                     searchPlaceholder="Search projects..."
                                     emptyResult="No projects found."
+                                    className="bg-background"
                                 />
                               ) : project ? (
                                 <div className="flex items-center gap-2">
@@ -333,6 +412,7 @@ export function TaskDetailDialog({
                                  <DatePicker
                                     date={currentTask.deadline}
                                     setDate={(d) => handleFieldChange('deadline', d)}
+                                    className="bg-background"
                                  />
                              ) : (
                                 currentTask.deadline ? format(currentTask.deadline, "PPP") : 'No deadline'
@@ -348,6 +428,7 @@ export function TaskDetailDialog({
                                     placeholder="Select assignees"
                                     searchPlaceholder="Search assignees..."
                                     emptyResult="No assignees found."
+                                    className="bg-background"
                                 />
                               ) : assignees.length > 0 ? (
                                 <div className="flex flex-col gap-2">
@@ -375,6 +456,7 @@ export function TaskDetailDialog({
                                     placeholder="Select tags"
                                     searchPlaceholder="Search tags..."
                                     emptyResult="No tags found."
+                                    className="bg-background"
                                 />
                               ) : taskTags.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
@@ -387,83 +469,6 @@ export function TaskDetailDialog({
                               ) : (<span>No tags</span>) }
                           </DetailRow>
                       </div>
-                    </TabsContent>
-                    <TabsContent value="activity">
-                      <div className="space-y-4 mt-4 border rounded-lg p-4">
-                          {sortedActivity && sortedActivity.length > 0 ? (
-                            <div className="space-y-6">
-                              {sortedActivity.map(activity => {
-                                const activityUser = users.find(u => u.id === activity.userId);
-                                return (
-                                  <div key={activity.id} className="flex items-start gap-4">
-                                    <Avatar className="h-8 w-8 mt-1">
-                                        <AvatarImage src={activityUser?.avatarUrl} data-ai-hint="person portrait" />
-                                        <AvatarFallback>{activityUser?.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 text-sm">
-                                      <p className="break-words">{activity.details}</p>
-                                      <p className="text-xs text-muted-foreground mt-0.5">
-                                        {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
-                                      </p>
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border-dashed">
-                                <Clock className="h-10 w-10 text-muted-foreground/30" />
-                                <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
-                            </div>
-                          )}
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </div>
-
-                {/* Right Column: Comments */}
-                <div className="md:col-span-1 space-y-6 flex flex-col">
-                    <h3 className="font-semibold text-lg flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" /> Comments</h3>
-                    <div className="flex-1 space-y-4 pr-2 -mr-2 overflow-y-auto">
-                        {task.comments && task.comments.length > 0 ? (
-                            task.comments.map((comment) => {
-                                const commentUser = users.find(u => u.id === comment.userId);
-                                return (
-                                <div key={comment.id} className="flex items-start gap-3">
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src={commentUser?.avatarUrl} data-ai-hint="person portrait"/>
-                                        <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-semibold text-sm">{commentUser?.name}</p>
-                                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(comment.createdAt, { addSuffix: true })}</p>
-                                        </div>
-                                        <p className="text-sm bg-muted rounded-lg p-2 mt-1 break-words">{comment.text}</p>
-                                    </div>
-                                </div>
-                                );
-                            })
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed h-full">
-                                <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
-                                <p className="mt-2 text-sm text-muted-foreground">No comments yet.</p>
-                            </div>
-                        )}
-                    </div>
-                    <div className="relative mt-auto">
-                        <Textarea 
-                            placeholder="Add a comment..." 
-                            className="pr-12"
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
-                        />
-                        <Button size="icon" className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8" onClick={handleSendComment}>
-                            <Send className="h-4 w-4"/>
-                            <span className="sr-only">Send Comment</span>
-                        </Button>
-                    </div>
                 </div>
             </div>
           </>
@@ -472,3 +477,5 @@ export function TaskDetailDialog({
     </Sheet>
   );
 }
+
+    
