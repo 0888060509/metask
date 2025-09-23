@@ -1,15 +1,20 @@
+version: "3.8"
+
 services:
   metatek.gui.metask:
     container_name: metatek.gui.metask
-    image: harbor.lab.riviu.com.vn/eggstech/metatek.gui.metask
+    build: .
     restart: unless-stopped
+    expose:
+      - "3000" # cho phép traefik truy cập cổng 3000 trong container
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.metatek-gui-metask.rule=Host(`metask.metatek.okayla.vn`)"
-      - "traefik.http.routers.metatek-gui-metask.entrypoints=websecure"
-      - "traefik.http.routers.metatek-gui-metask.tls.certresolver=myresolver"
+      - "traefik.http.routers.metatek-gui-metask-demo.rule=Host(`metask.metatek.okayla.vn`)"
+      - "traefik.http.routers.metatek-gui-metask-demo.entrypoints=websecure"
+      - "traefik.http.routers.metatek-gui-metask-demo.tls.certresolver=myresolver"
+      - "traefik.http.services.metatek-gui-metask-demo.loadbalancer.server.port=3000" # chỉ cho traefik biết app chạy ở port 3000
 
 networks:
   default:
-    name: app
     external: true
+    name: app
